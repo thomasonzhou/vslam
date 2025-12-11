@@ -1,38 +1,20 @@
 #include "vizlib.h"
+#include <string>
+#include <vector>
 #include <iostream>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <pangolin/pangolin.h>
-#include <unistd.h>
+#include <chrono>
 
 using namespace Eigen;
+
+namespace {
 
 void pangolin_draw(const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses);
 void draw_axes(const Isometry3d& pose);
 void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2);
 void draw_line(const Vector3d& v1, const Vector3d& v2);
-
-void visualize_trajectory(){
-    std::string trajectory_file = "../trajectory.txt";
-
-    std::vector<Isometry3d, aligned_allocator<Isometry3d>> poses;
-
-    std::ifstream fin(trajectory_file);
-    if (!fin){
-        std::cout << "file not found: " << trajectory_file << std::endl;
-        return;
-    }
-
-    double time, tx, ty, tz, qx, qy, qz, qw;
-    while(fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw){
-        Isometry3d Twr(Quaterniond(qw, qx, qy, qz));
-        Twr.pretranslate(Vector3d(tx, ty, tz));
-        poses.push_back(Twr);
-    }
-    std::cout << poses.size() << " poses" << std::endl;
-
-    pangolin_draw(poses);
-}
 
 void pangolin_draw(const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses){
 
@@ -67,7 +49,7 @@ void pangolin_draw(const std::vector<Isometry3d, aligned_allocator<Isometry3d>>&
         }
 
         pangolin::FinishFrame();
-        usleep(5000);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
@@ -99,4 +81,28 @@ void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2){
 void draw_line(const Vector3d& v1, const Vector3d& v2){
     glVertex3d(v1[0], v1[1], v1[2]);
     glVertex3d(v2[0], v2[1], v2[2]);
+}
+
+} 
+
+void visualize_trajectory(){
+    std::string trajectory_file = "../trajectory.txt";
+
+    std::vector<Isometry3d, aligned_allocator<Isometry3d>> poses;
+
+    std::ifstream fin(trajectory_file);
+    if (!fin){
+        std::cout << "file not found: " << trajectory_file << std::endl;
+        return;
+    }
+
+    double time, tx, ty, tz, qx, qy, qz, qw;
+    while(fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw){
+        Isometry3d Twr(Quaterniond(qw, qx, qy, qz));
+        Twr.pretranslate(Vector3d(tx, ty, tz));
+        poses.push_back(Twr);
+    }
+    std::cout << poses.size() << " poses" << std::endl;
+
+    pangolin_draw(poses);
 }
