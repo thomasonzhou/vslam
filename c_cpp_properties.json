@@ -1,0 +1,7 @@
+{
+  "env": {
+    "myIncludePath": ["${workspaceFolder}/include", "${workspaceFolder}/src", "/usr/include/eigen3"]
+  },
+  "configurations": [],
+  "version": 1
+}
