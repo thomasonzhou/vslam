@@ -1,8 +1,7 @@
-#include "vizlib.h"
+#include "viz/vizlib.h"
 
+int main(int argc, char** argv) {
+  visualize_trajectory();
 
-int main(int argc, char **argv){
-    visualize_trajectory();
-
-    return 0;
+  return 0;
 }
