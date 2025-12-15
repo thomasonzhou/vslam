@@ -12,6 +12,8 @@ using Eigen::Isometry3d;
 using Eigen::Quaterniond;
 using Eigen::Vector3d;
 
+typedef std::vector<Isometry3d, aligned_allocator<Isometry3d>> poseVector;
+
 struct pangolin_config{
     bool draw_pose_axes_ = true;
 
@@ -21,5 +23,4 @@ struct pangolin_config{
     }
 };
 
-void pangolin_draw(
-    const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses, const pangolin_config& pg_cfg); 
+void pangolin_draw(const poseVector& poses, const pangolin_config& pg_config); 
