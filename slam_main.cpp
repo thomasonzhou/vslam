@@ -7,6 +7,8 @@ using Eigen::Isometry3d;
 using Eigen::aligned_allocator;
 using Eigen::Quaterniond;
 
+constexpr auto pg = pangolin_config().draw_pose_axes(false);
+
 void visualize_trajectory() {
   std::string trajectory_file = "../trajectory.txt";
 
@@ -26,7 +28,7 @@ void visualize_trajectory() {
   }
   std::cout << poses.size() << " poses" << std::endl;
 
-  pangolin_draw(poses);
+  pangolin_draw(poses, pg);
 }
 
 

@@ -39,7 +39,7 @@ void draw_line(const Vector3d& v1, const Vector3d& v2) {
 
 
 void pangolin_draw(
-    const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses) {
+    const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses, const pangolin_config& pg) {
   constexpr float view_w = 1920.0f;
   constexpr float view_h = 1080.0f;
   pangolin::CreateWindowAndBind("Trajectory", view_w, view_h);
@@ -67,7 +67,9 @@ void pangolin_draw(
     glLineWidth(2);
 
     for (size_t i = 0; i < poses.size(); ++i) {
-      draw_axes(poses[i]);
+      if (pg.draw_pose_axes_){
+        draw_axes(poses[i]);
+      }
       if (i > 0) {
         connect_axes(poses[i - 1], poses[i]);
       }
