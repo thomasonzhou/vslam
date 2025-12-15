@@ -23,4 +23,14 @@ struct pangolin_config{
     }
 };
 
-void pangolin_draw(const poseVector& poses, const pangolin_config& pg_config); 
+struct trajectory_view{
+    const pangolin_config& pg_config;
+    const poseVector& poses;
+
+    trajectory_view(const pangolin_config& pg_config, const poseVector& poses): pg_config(pg_config), poses(poses) {};
+};
+
+void pangolin_draw(const std::vector<trajectory_view>& traj_view); 
+void pangolin_draw(const trajectory_view& traj_view){
+    pangolin_draw({traj_view});
+}

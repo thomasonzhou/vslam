@@ -50,7 +50,7 @@ void draw_line(const Vector3d& v1, const Vector3d& v2) {
 }  // namespace
 
 
-void pangolin_draw(const poseVector& poses, const pangolin_config& pg_config) {
+void pangolin_draw(const std::vector<trajectory_view>& traj_views) {
   constexpr float view_w = 1920.0f;
   constexpr float view_h = 1080.0f;
   pangolin::CreateWindowAndBind("Trajectory", view_w, view_h);
@@ -77,9 +77,10 @@ void pangolin_draw(const poseVector& poses, const pangolin_config& pg_config) {
     glClearColor(white, white, white, white);
     glLineWidth(2);
 
-    draw_trajectory(poses, pg_config);
+    for (const auto& traj_view: traj_views){
+      draw_trajectory(traj_view.poses, traj_view.pg_config);
+    }
     
-
     pangolin::FinishFrame();
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }

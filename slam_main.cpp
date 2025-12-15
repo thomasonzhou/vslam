@@ -8,15 +8,17 @@ using Eigen::Isometry3d;
 using Eigen::aligned_allocator;
 using Eigen::Quaterniond;
 
-constexpr auto pg = pangolin_config().draw_pose_axes(false);
+constexpr auto pg_config = pangolin_config()
+    .draw_pose_axes(false);
+const std::string estimated_traj = "../estimated.txt";
+const std::string gt_traj = "../groundtruth.txt";
 
 void visualize_trajectory() {
-  std::string trajectory_file = "../estimated.txt";
-  poseVector poses = trajectory_from_file(trajectory_file);
-  std::string trajectory_file2 = "../groundtruth.txt";
-  poseVector poses2 = trajectory_from_file(trajectory_file2);
-  poses.insert(poses.end(), poses2.begin(), poses2.end());
-  pangolin_draw(poses, pg);
+  poseVector estimated_poses = trajectory_from_file(estimated_traj);
+  trajectory_view estimated_view(pg_config, estimated_poses);
+  poseVector gt_poses = trajectory_from_file(gt_traj);
+  trajectory_view gt_view(pg_config, gt_poses);
+  pangolin_draw({estimated_view, gt_view});
 }
 
 
