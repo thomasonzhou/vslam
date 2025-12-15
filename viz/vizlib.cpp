@@ -3,8 +3,8 @@
 namespace {
 
 void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config);
-void draw_axes(const Isometry3d& pose);
-void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2, const pangolin_config& pg_config);
+void draw_axes(const Sophus::SE3d& pose);
+void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2, const pangolin_config& pg_config);
 void draw_line(const Vector3d& v1, const Vector3d& v2);
 
 void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config){
@@ -18,7 +18,7 @@ void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config){
     }
 }
 
-void draw_axes(const Isometry3d& pose) {
+void draw_axes(const Sophus::SE3d& pose) {
   constexpr double axisLength = 0.1;
   const Vector3d Ow = pose.translation();
   const Vector3d Ox = pose * (axisLength * Vector3d(1.0, 0, 0));
@@ -34,7 +34,7 @@ void draw_axes(const Isometry3d& pose) {
   glEnd();
 }
 
-void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2, const pangolin_config& pg_config) {
+void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2, const pangolin_config& pg_config) {
   const Vector3d t1 = pose1.translation();
   const Vector3d t2 = pose2.translation();
   glBegin(GL_LINES);

@@ -1,7 +1,7 @@
 #pragma once
 #include <pangolin/pangolin.h>
 #include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <sophus/se3.hpp>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -13,7 +13,7 @@ using Eigen::Isometry3d;
 using Eigen::Quaterniond;
 using Eigen::Vector3d;
 
-typedef std::vector<Isometry3d, aligned_allocator<Isometry3d>> poseVector;
+typedef std::vector<Sophus::SE3d, aligned_allocator<Sophus::SE3d>> poseVector;
 
 struct pangolin_config{
     bool draw_pose_axes_ = false;

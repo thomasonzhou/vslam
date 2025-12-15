@@ -16,9 +16,7 @@ poseVector trajectory_from_file(const std::string& trajectory_file){
   
   double time, tx, ty, tz, qx, qy, qz, qw;
   while (fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw) {
-      Isometry3d Twr(Quaterniond(qw, qx, qy, qz));
-    Twr.pretranslate(Vector3d(tx, ty, tz));
-    poses.push_back(Twr);
+    poses.emplace_back(Quaterniond(qw, qx, qy, qz), Vector3d(tx, ty, tz));
   }
   return poses;
 }
