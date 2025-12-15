@@ -1,9 +1,10 @@
 #include "viz/vizlib.h"
 
 namespace {
+
 void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config);
 void draw_axes(const Isometry3d& pose);
-void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2);
+void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2, const pangolin_config& pg_config);
 void draw_line(const Vector3d& v1, const Vector3d& v2);
 
 void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config){
@@ -12,7 +13,7 @@ void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config){
         draw_axes(poses[i]);
       }
       if (i > 0) {
-        connect_axes(poses[i - 1], poses[i]);
+        connect_axes(poses[i - 1], poses[i], pg_config);
       }
     }
 }
@@ -33,11 +34,19 @@ void draw_axes(const Isometry3d& pose) {
   glEnd();
 }
 
-void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2) {
+void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2, const pangolin_config& pg_config) {
   const Vector3d t1 = pose1.translation();
   const Vector3d t2 = pose2.translation();
   glBegin(GL_LINES);
-  glColor3f(0.0f, 0.0f, 0.0f);
+  
+  auto it = color_map.find(pg_config.trajectory_color_);
+  if (it != color_map.end()) {
+    const auto& [r, g, b] = it->second;
+    glColor3f(r, g, b);
+  } else {
+    glColor3f(0.0f, 0.0f, 0.0f);
+  }
+  
   draw_line(t1, t2);
   glEnd();
 }
