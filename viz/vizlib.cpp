@@ -1,31 +1,47 @@
 #include "viz/vizlib.h"
 
-#include <pangolin/pangolin.h>
-
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include <chrono>
-#include <iostream>
-#include <string>
-#include <vector>
-
 namespace {
-
-using Eigen::aligned_allocator;
-using Eigen::Isometry3d;
-using Eigen::Quaterniond;
-using Eigen::Vector3d;
-
-void pangolin_draw(
-    const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses);
 void draw_axes(const Isometry3d& pose);
 void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2);
 void draw_line(const Vector3d& v1, const Vector3d& v2);
 
+void draw_axes(const Isometry3d& pose) {
+  constexpr double axisLength = 0.1;
+  const Vector3d Ow = pose.translation();
+  const Vector3d Ox = pose * (axisLength * Vector3d(1.0, 0, 0));
+  const Vector3d Oy = pose * (axisLength * Vector3d(0, 1.0, 0));
+  const Vector3d Oz = pose * (axisLength * Vector3d(0, 0, 1.0));
+  glBegin(GL_LINES);
+  glColor3f(1.0, 0.0, 0.0);
+  draw_line(Ow, Ox);
+  glColor3f(0.0, 1.0, 0.0);
+  draw_line(Ow, Oy);
+  glColor3f(0.0, 0.0, 1.0);
+  draw_line(Ow, Oz);
+  glEnd();
+}
+
+void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2) {
+  const Vector3d t1 = pose1.translation();
+  const Vector3d t2 = pose2.translation();
+  glBegin(GL_LINES);
+  glColor3f(0.0f, 0.0f, 0.0f);
+  draw_line(t1, t2);
+  glEnd();
+}
+
+void draw_line(const Vector3d& v1, const Vector3d& v2) {
+  glVertex3d(v1[0], v1[1], v1[2]);
+  glVertex3d(v2[0], v2[1], v2[2]);
+}
+
+}  // namespace
+
+
 void pangolin_draw(
     const std::vector<Isometry3d, aligned_allocator<Isometry3d>>& poses) {
-  constexpr float view_w = 1024.0f;
-  constexpr float view_h = 768.0f;
+  constexpr float view_w = 1920.0f;
+  constexpr float view_h = 1080.0f;
   pangolin::CreateWindowAndBind("Trajectory", view_w, view_h);
   glEnable(GL_DEPTH_TEST);  // enable 3D depth buffer for occlusion
   glEnable(GL_BLEND);       // enable translucent objects
@@ -60,58 +76,4 @@ void pangolin_draw(
     pangolin::FinishFrame();
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
-}
-
-void draw_axes(const Isometry3d& pose) {
-  constexpr double axisLength = 0.1;
-  const Vector3d Ow = pose.translation();
-  const Vector3d Ox = pose * (axisLength * Vector3d(1.0, 0, 0));
-  const Vector3d Oy = pose * (axisLength * Vector3d(0, 1.0, 0));
-  const Vector3d Oz = pose * (axisLength * Vector3d(0, 0, 1.0));
-  glBegin(GL_LINES);
-  glColor3f(1.0, 0.0, 0.0);
-  draw_line(Ow, Ox);
-  glColor3f(0.0, 1.0, 0.0);
-  draw_line(Ow, Oy);
-  glColor3f(0.0, 0.0, 1.0);
-  draw_line(Ow, Oz);
-  glEnd();
-}
-
-void connect_axes(const Isometry3d& pose1, const Isometry3d& pose2) {
-  const Vector3d t1 = pose1.translation();
-  const Vector3d t2 = pose2.translation();
-  glBegin(GL_LINES);
-  glColor3f(0.0f, 0.0f, 0.0f);
-  draw_line(t1, t2);
-  glEnd();
-}
-
-void draw_line(const Vector3d& v1, const Vector3d& v2) {
-  glVertex3d(v1[0], v1[1], v1[2]);
-  glVertex3d(v2[0], v2[1], v2[2]);
-}
-
-}  // namespace
-
-void visualize_trajectory() {
-  std::string trajectory_file = "../trajectory.txt";
-
-  std::vector<Isometry3d, aligned_allocator<Isometry3d>> poses;
-
-  std::ifstream fin(trajectory_file);
-  if (!fin) {
-    std::cout << "file not found: " << trajectory_file << std::endl;
-    return;
-  }
-
-  double time, tx, ty, tz, qx, qy, qz, qw;
-  while (fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw) {
-    Isometry3d Twr(Quaterniond(qw, qx, qy, qz));
-    Twr.pretranslate(Vector3d(tx, ty, tz));
-    poses.push_back(Twr);
-  }
-  std::cout << poses.size() << " poses" << std::endl;
-
-  pangolin_draw(poses);
 }
