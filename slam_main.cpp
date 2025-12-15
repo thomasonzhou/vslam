@@ -1,4 +1,5 @@
 #include "viz/vizlib.h"
+#include "utils/utillib.h"
 #include <string>
 #include <vector>
 #include <Eigen/Geometry>
@@ -11,22 +12,8 @@ constexpr auto pg = pangolin_config().draw_pose_axes(false);
 
 void visualize_trajectory() {
   std::string trajectory_file = "../trajectory.txt";
-
-  std::vector<Isometry3d, aligned_allocator<Isometry3d>> poses;
-
-  std::ifstream fin(trajectory_file);
-  if (!fin) {
-    std::cout << "file not found: " << trajectory_file << std::endl;
-    return;
-  }
-
-  double time, tx, ty, tz, qx, qy, qz, qw;
-  while (fin >> time >> tx >> ty >> tz >> qx >> qy >> qz >> qw) {
-    Isometry3d Twr(Quaterniond(qw, qx, qy, qz));
-    Twr.pretranslate(Vector3d(tx, ty, tz));
-    poses.push_back(Twr);
-  }
-  std::cout << poses.size() << " poses" << std::endl;
+  poseVector poses = trajectory_from_file(trajectory_file);
+  
 
   pangolin_draw(poses, pg);
 }

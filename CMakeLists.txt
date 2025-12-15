@@ -21,8 +21,11 @@ foreach(lib ${Pangolin_LIBRARIES})
     endif()
 endforeach()
 
-add_library(geom SHARED viz/vizlib.cpp)
-target_link_libraries(geom ${PANGOLIN_LIBS_FILTERED})
+add_library(viz SHARED viz/vizlib.cpp)
+target_link_libraries(viz ${PANGOLIN_LIBS_FILTERED})
+
+add_library(utils SHARED utils/utillib.cpp)
+target_link_libraries(utils Eigen3::Eigen)
 
 add_executable(vslam slam_main.cpp)
-target_link_libraries(vslam geom)
+target_link_libraries(vslam viz utils)
