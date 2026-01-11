@@ -45,6 +45,9 @@ namespace {
     };
 };
 
+constexpr float view_w = 1920.0f;
+constexpr float view_h = 1080.0f;
+
 void pangolin_draw(const std::vector<trajectory_view>& traj_view); 
 void pangolin_draw(const trajectory_view& traj_view){
     pangolin_draw({traj_view});

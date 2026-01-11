@@ -58,10 +58,7 @@ void draw_line(const Vector3d& v1, const Vector3d& v2) {
 
 }  // namespace
 
-
 void pangolin_draw(const std::vector<trajectory_view>& traj_views) {
-  constexpr float view_w = 1920.0f;
-  constexpr float view_h = 1080.0f;
   pangolin::CreateWindowAndBind("Trajectory", view_w, view_h);
   glEnable(GL_DEPTH_TEST);  // enable 3D depth buffer for occlusion
   glEnable(GL_BLEND);       // enable translucent objects

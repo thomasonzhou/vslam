@@ -8,9 +8,14 @@ project(VSLAM)
 find_package(Pangolin REQUIRED)
 find_package(Sophus REQUIRED)
 find_package (Eigen3 REQUIRED NO_MODULE)
+find_package(OpenCV REQUIRED)
+find_package(Ceres REQUIRED)
+find_package(glog REQUIRED)
+find_package(g2o REQUIRED)
 
 include_directories(${Pangolin_INCLUDE_DIRS})
 include_directories(${Sophus_INCLUDE_DIRS})
+include_directories(${OPENCV_INCLUDE_DIRS}) 
 include_directories(${CMAKE_SOURCE_DIR})
 
 # ignore python pangolin
