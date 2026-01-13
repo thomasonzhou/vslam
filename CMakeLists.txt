@@ -15,7 +15,7 @@ find_package(g2o REQUIRED)
 
 include_directories(${Pangolin_INCLUDE_DIRS})
 include_directories(${Sophus_INCLUDE_DIRS})
-include_directories(${OPENCV_INCLUDE_DIRS}) 
+include_directories(${OpenCV_INCLUDE_DIRS}) 
 include_directories(${CMAKE_SOURCE_DIR})
 
 # ignore python pangolin
@@ -34,3 +34,6 @@ target_link_libraries(utils Eigen3::Eigen)
 
 add_executable(vslam slam_main.cpp)
 target_link_libraries(vslam viz utils)
+
+add_executable(orb frontend/orb.cpp)
+target_link_libraries(orb ${OpenCV_LIBS})
