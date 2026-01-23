@@ -29,18 +29,19 @@ void pose_estimation_2d2d(
     cv::Mat homography = cv::findHomography(matched1, matched2, cv::RANSAC, ransacReprojThreshold);
     std::cout << "homography matrix: " << std::endl << homography << std::endl;
 
-    const cv::Mat distortion1;
-    const cv::Mat distortion2;
+    const cv::Mat distortion1 = cv::Mat::zeros(1, 5, CV_64F);
+    const cv::Mat distortion2 = cv::Mat::zeros(1, 5, CV_64F);
     cv::Mat essential = cv::findEssentialMat(
         matched1, matched2, 
-        intrinsics1.K, intrinsics2.K, 
-        distortion1, distortion2);
+        intrinsics1.K, distortion1, 
+        intrinsics2.K, distortion2);
     std::cout << "essential matrix: " << std::endl << essential << std::endl;
 
     cv::Mat essential2;
     cv::recoverPose(matched1, matched2, 
         intrinsics1.K, distortion1, 
-        intrinsics2.K, distortion2, essential2, c1_R_c2, t_21);
+        intrinsics2.K, distortion2, 
+        essential2, c1_R_c2, t_21);
 
     std::cout << "essential 2 matrix: " << std::endl << essential2 << std::endl;
 };

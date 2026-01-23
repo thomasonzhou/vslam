@@ -1,5 +1,6 @@
 #include "utils/eval.h"
 #include "frontend/orb.h"
+#include "backend/epipolar.h"
 #include <string>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -32,8 +33,6 @@ int main(int argc, char** argv) {
   std::vector<cv::DMatch> matches;
   brute_force_match(descriptors1, descriptors2, matches);
 
-  // cv::Mat img1_descriptors;
-  // cv::Mat img2_descriptors;
   cv::Mat match_img;
   cv::drawMatches(img1, keypoints1, img2, keypoints2, matches, match_img);
 
@@ -41,7 +40,15 @@ int main(int argc, char** argv) {
   cv::waitKey(0);
 
   // backend
+  cv::Mat c1_R_c2;
+  cv::Mat t_21;
 
+  const PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
+  const PinholeCameraIntrinsics intrinsics2 = intrinsics1;
+  pose_estimation_2d2d(keypoints1, keypoints2, matches, intrinsics1, intrinsics2, c1_R_c2, t_21);
+
+  std::cout << "c1_R_c2 " << c1_R_c2 << std::endl;
+  std::cout << "t_21 " << t_21 << std::endl;
   // evaluate
   // compare_trajectories();
 
