@@ -44,6 +44,8 @@ void pose_estimation_2d2d(
         essential2, c1_R_c2, t_21);
 
     std::cout << "essential 2 matrix: " << std::endl << essential2 << std::endl;
+
+    
 };
 
 cv::Point2d pixel_to_camera(const cv::Point2d& pixel, const PinholeCameraIntrinsics& intrinsics){
