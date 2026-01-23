@@ -26,11 +26,15 @@ foreach(lib ${Pangolin_LIBRARIES})
     endif()
 endforeach()
 
+add_library(backend SHARED backend/epipolar.cpp)
+target_link_libraries(backend ${OpenCV_LIBS})
+
+
 add_library(viz SHARED viz/vizlib.cpp)
 target_link_libraries(viz ${PANGOLIN_LIBS_FILTERED})
 
-add_library(utils SHARED utils/utillib.cpp)
-target_link_libraries(utils Eigen3::Eigen)
+add_library(utils SHARED utils/utillib.cpp utils/eval.cpp)
+target_link_libraries(utils viz Eigen3::Eigen)
 
 add_executable(vslam slam_main.cpp)
 target_link_libraries(vslam viz utils)
