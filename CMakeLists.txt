@@ -36,8 +36,8 @@ target_link_libraries(viz ${PANGOLIN_LIBS_FILTERED})
 add_library(utils SHARED utils/utillib.cpp utils/eval.cpp)
 target_link_libraries(utils viz Eigen3::Eigen)
 
-add_executable(vslam slam_main.cpp)
-target_link_libraries(vslam viz utils)
-
-add_executable(orb frontend/orb.cpp)
+add_library(orb frontend/orb.cpp)
 target_link_libraries(orb ${OpenCV_LIBS})
+
+add_executable(vslam slam_main.cpp)
+target_link_libraries(vslam viz utils orb)
