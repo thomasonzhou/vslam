@@ -8,7 +8,6 @@
 int main(int argc, char** argv) {
 
   // frontend
-
   std::string file1 = "../1.png";
   std::string file2 = "../2.png";
   cv::Mat img1 = cv::imread(file1, cv::IMREAD_GRAYSCALE);
@@ -51,6 +50,9 @@ int main(int argc, char** argv) {
   std::cout << "t_21 " << t_21 << std::endl;
   // evaluate
   // compare_trajectories();
+
+  std::vector<cv::Point3d> points3d;
+  triangulation(keypoints1, keypoints2, matches, intrinsics1, intrinsics2, c1_R_c2, t_21, points3d);
 
   return 0;
 }

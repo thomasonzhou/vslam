@@ -52,3 +52,14 @@ cv::Mat hat(const cv::Mat& t){
                                     z, 0, -x,
                                     -y, x, 0);
 };
+
+void triangulation(
+    const std::vector<cv::KeyPoint>& keypoints1,
+    const std::vector<cv::KeyPoint>& keypoints2,
+    const std::vector<cv::DMatch>& matches,
+    const PinholeCameraIntrinsics& intrinsics1,
+    const PinholeCameraIntrinsics& intrinsics2,
+    const cv::Mat& R, 
+    const cv::Mat& t, 
+    std::vector<cv::Point3d>& points
+);

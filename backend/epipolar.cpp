@@ -59,3 +59,49 @@ void pose_estimation_2d2d(
 
 };
 
+
+void triangulation(
+    const std::vector<cv::KeyPoint>& keypoints1,
+    const std::vector<cv::KeyPoint>& keypoints2,
+    const std::vector<cv::DMatch>& matches,
+    const PinholeCameraIntrinsics& intrinsics1,
+    const PinholeCameraIntrinsics& intrinsics2,
+    const cv::Mat& R, 
+    const cv::Mat& t, 
+    std::vector<cv::Point3d>& points
+){
+    
+    std::vector<cv::Point2d> points1;
+    std::vector<cv::Point2d> points2;
+    
+    for(const cv::DMatch& match: matches){
+        points1.push_back(pixel_to_camera(keypoints1[match.queryIdx].pt, intrinsics1));
+        points2.push_back(pixel_to_camera(keypoints2[match.trainIdx].pt, intrinsics2));
+    }
+    
+    cv::Mat T1 = (cv::Mat_<double>(3, 4) << 
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0
+    );
+    cv::Mat T2 = (cv::Mat_<double> (3, 4) << 
+        R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2), t.at<double>(0, 0), 
+        R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2), t.at<double>(1, 0), 
+        R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), t.at<double>(2, 0)
+    );
+
+    cv::Mat points4d;
+    cv::triangulatePoints(T1, T2, points1, points2, points4d);
+
+    for(size_t i = 0; i < points4d.cols; ++i){
+        cv::Mat x = points4d.col(i);
+        x /= x.at<double>(3, 0);
+
+        points.emplace_back(
+            x.at<double>(0, 0),
+            x.at<double>(1, 0),
+            x.at<double>(2, 0)
+        );
+    }
+};
+
