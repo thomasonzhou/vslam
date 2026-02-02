@@ -33,14 +33,14 @@ int main(int argc, char** argv) {
 
   // backend
   cv::Mat c1_R_c2;
-  cv::Mat t_21;
+  cv::Mat t_12;
 
   const PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
   const PinholeCameraIntrinsics intrinsics2 = intrinsics1;
-  pose_estimation_2d2d(keypoints1, keypoints2, matches, intrinsics1, intrinsics2, c1_R_c2, t_21);
+  pose_estimation_2d2d(keypoints1, keypoints2, matches, intrinsics1, intrinsics2, c1_R_c2, t_12);
 
   std::cout << "c1_R_c2 " << c1_R_c2 << std::endl;
-  std::cout << "t_21 " << t_21 << std::endl;
+  std::cout << "t_21 " << t_12 << std::endl;
 
   // PnP
   std::string depth_file1 = "../depth1.png";
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   std::cout << R_pnp << std::endl;
 
   // note how the translation is very different, due to a difference in depth.
-  std::cout << t_21 << std::endl;
+  std::cout << t_12 << std::endl;
   std::cout << t_vec << std::endl;
 
   return 0;
