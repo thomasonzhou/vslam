@@ -1,6 +1,7 @@
 #include "utils/eval.h"
 #include "frontend/orb.h"
 #include "backend/epipolar.h"
+#include "backend/pnp.h"
 #include <string>
 #include <opencv2/imgcodecs.hpp>
 
@@ -79,6 +80,16 @@ int main(int argc, char** argv) {
   // note how the translation is very different, due to a difference in depth.
   std::cout << t_12 << std::endl;
   std::cout << t_vec << std::endl;
+
+  std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points3d_eigen;
+  std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> points2d_eigen;
+  for(size_t i = 0; i < points3d.size(); ++i){
+    points3d_eigen.emplace_back(points3d[i].x, points3d[i].y, points3d[i].z);
+    points2d_eigen.emplace_back(points2d_img2[i].x, points2d_img2[i].y);
+  }
+
+  Sophus::SE3d c2_T_c1_gn;
+  bundle_adjustment_gauss_newton(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_gn);
 
   return 0;
 }

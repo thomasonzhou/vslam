@@ -1,30 +1,9 @@
+#pragma once
+
+#include "backend/calib.h"
 #include <opencv2/core.hpp>
 #include <opencv2/calib3d.hpp>
 #include <vector>
-
-struct PinholeCameraIntrinsics{
-    cv::Mat K;
-
-    inline double fx() const noexcept {
-        return K.at<double>(0,0);
-    };
-    inline double fy() const noexcept {
-        return K.at<double>(1,1);
-    };
-    inline double cx() const noexcept {
-        return K.at<double>(0,2);
-    };
-    inline double cy() const noexcept {
-        return K.at<double>(1,2);
-    };
-
-    PinholeCameraIntrinsics(const double fx, const double fy, const double cx, const double cy){
-        K = (cv::Mat_<double>(3,3) << fx, 0.0, cx, 
-        0.0, fy, cy,
-        0.0, 0.0, 1.0);
-    }
-};
-
 
 void pose_estimation_2d2d(
     const std::vector<cv::KeyPoint>& keypoints1, 

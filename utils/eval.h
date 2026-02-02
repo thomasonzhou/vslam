@@ -1,3 +1,5 @@
+#pragma once
+
 #include "viz/vizlib.h"
 
 const auto est_config = pangolin_config()
