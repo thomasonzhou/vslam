@@ -11,84 +11,98 @@ void bundle_adjustment(
     // pertubation norm threshold
     constexpr double convergence_epsilon = 1e-6;
 
-    // levenberg marquardt
-    constexpr double lm_lambda_multiplier = 10.0;
-    constexpr int max_lm_iterations = 10;
+    // dogleg
+    double delta = 1.0;
+    constexpr double max_delta = 10.0;
 
-    Eigen::Matrix<double, 6, 1> b;
-    Eigen::Matrix<double, 6, 6> H;
+    // Gauss Newton
+    Eigen::Matrix<double,6, 6> H_gn;
+    Eigen::Matrix<double,6, 1> b_gn;
+    Eigen::Matrix<double, 6, 1> dx_gn;
+
+    // steepest descent
+    Eigen::Matrix<double, 6, 1> dx_sd;
+
     Eigen::Matrix<double, 6, 1> dx;
-    // fill out J matrix
-    double last_cost = std::numeric_limits<double>::max();
 
-    double lambda = 0.001;
-    for(size_t iter = 0; iter < max_iterations; ++iter){
-        b = Eigen::Matrix<double, 6, 1>::Zero();
-        H = Eigen::Matrix<double, 6, 6>::Zero();
-        
-        for(size_t i = 0; i < points3d_cam1.size(); ++i){
-            const Eigen::Vector3d point3d_cam2 = c2_T_c1 * points3d_cam1[i];
-            const Eigen::Vector2d error = reprojection_error(point3d_cam2, points2d_img2[i], intrinsics2);
+    for (int iter = 0; iter < max_iterations; ++iter){
+
+        H_gn = Eigen::Matrix<double,6, 6>::Zero();
+        b_gn = Eigen::Matrix<double,6, 1>::Zero();
+
+        double cost = 0.0;
+        for (size_t i = 0; i < points3d_cam1.size(); ++i){
+            Eigen::Vector3d point3d_cam2 = c2_T_c1 * points3d_cam1[i];
+            Eigen::Vector2d error = reprojection_error(point3d_cam2, points2d_img2[i], intrinsics2);
+            cost += error.squaredNorm();
 
             Eigen::Matrix<double, 2, 6> J = error_jacobian_wrt_perturbation(point3d_cam2, intrinsics2);
 
-            H += J.transpose() * J;
-            b += -J.transpose() * error;
+            H_gn += J.transpose() * J;
+            b_gn += -J.transpose() * error;
         }
 
-        // solve for perturbation in the tangent space of the Lie Algebra
-        dx = (H + lambda * Eigen::Matrix<double, 6, 6>::Identity()).ldlt().solve(b);
+        dx_gn = H_gn.ldlt().solve(b_gn);
 
-        if (std::isnan(dx[0]) || std::isnan(dx[1])){
-            std::cerr << "nan update, breaking" << std::endl;
+        // case 1: full Gauss Newton step
+        if (dx_gn.norm() < delta){
+            dx = dx_gn;
+        }
+        else{
+            dx_sd = (b_gn.squaredNorm()) / (b_gn.transpose() * H_gn * b_gn) * b_gn;
+            // case 2: scale steepest descent to trust region boundary
+            if (dx_sd.norm() >= delta){
+                dx = (delta / dx_sd.norm()) * dx_sd;
+            }
+            // case 3: dog leg, full steepest descent plus scaled Gauss Newton to boundary
+            else{
+                const Eigen::Matrix<double, 6, 1> dx_dogleg = dx_gn - dx_sd;
+
+                const double c1 = dx_dogleg.transpose() * dx_dogleg;
+                const double c2 = 2.0 * dx_sd.transpose() * dx_dogleg;
+                const double c3 = dx_sd.transpose() * dx_sd - delta * delta;
+
+                const double tau = (-c2 + std::sqrt(c2*c2 - 4.0 * c1 * c3))/ (2.0 * c1);
+
+                dx = dx_sd + tau * dx_dogleg;
+            }
+        }
+
+        if (dx.norm() < convergence_epsilon){
+            std::cout << "converged, breaking" << std::endl;
             break;
         }
-        
-        // check to see if update will increase or reduce cost
-        Sophus::SE3d pose_candidate = Sophus::SE3d::exp(dx) * c2_T_c1;
-        double cost = sum_of_squares_cost(
-            points3d_cam1,
-            points2d_img2,
-            intrinsics2, 
-            pose_candidate
-        );
-        std::cout << "iter: " << iter << ", cost: " << std::cout.precision(12) << cost << ", last_cost: " << last_cost << std::endl;
 
-        if (dx.norm() <= convergence_epsilon){
-            std::cout << "converged" << std::endl;
-            break;
-        }
-        if (cost > last_cost) {
-            std::cout << "cost increased from from " << last_cost << " to " << cost << ", updating lambda" << std::endl;
+        const Sophus::SE3d candidate_pose = Sophus::SE3d::exp(dx) * c2_T_c1;
+        const double candidate_cost = sum_of_squares_cost(points3d_cam1, points2d_img2, intrinsics2, candidate_pose);
 
-            for (int lm_iter = 0; lm_iter < max_lm_iterations; ++lm_iter){
-                lambda *= lm_lambda_multiplier;
-                Eigen::Matrix<double, 6, 6> H_lambda_eye = H + lambda * Eigen::Matrix<double, 6, 6>::Identity();
+        const double actual_reduction = cost - candidate_cost;
+        // only the second term requires a negative, give, that b_gn already accounts for the negative
+        const double predicted_reduction = b_gn.dot(dx) - 0.5 * dx.transpose() * H_gn * dx;
 
-                dx = H_lambda_eye.ldlt().solve(b);
-                pose_candidate = Sophus::SE3d::exp(dx) * c2_T_c1;
-                cost = sum_of_squares_cost(
-                    points3d_cam1,
-                    points2d_img2,
-                    intrinsics2, 
-                    pose_candidate
-                );
-                std::cout << "lambda: " << lambda << ", cost: " << cost << ", last cost: " << last_cost << std::endl;
+        const double gain_ratio = actual_reduction / predicted_reduction;
 
-                if (cost < last_cost){
-                    break;
-                } 
+        // trust region update
+        constexpr double tr_good_model_thresh = 0.75;
+        constexpr double tr_poor_model_thresh = 0.75;
+        constexpr double tr_can_expand_ratio = 0.8;
+        constexpr double tr_scale = 2.0;
+        if (gain_ratio > 0.0){
+
+            // loss decreased
+            cost = candidate_cost;
+            c2_T_c1 = candidate_pose;
+            if (gain_ratio > tr_good_model_thresh && dx.norm() >= tr_can_expand_ratio * delta){
+                delta = std::min(delta * tr_scale, max_delta);
             }
-
-            if (cost >= last_cost){
-                std::cerr << "Levenberg-Marquardt didn't converge, breaking" << std::endl;
-                break;
+            else if(gain_ratio < tr_poor_model_thresh){
+                delta /= tr_scale;
             }
-
-        } else{
-            lambda /= lm_lambda_multiplier;
+            std::cout << "lower cost " << cost<< ", changing delta to " << delta << std::endl;
         }
-        c2_T_c1 = Sophus::SE3d::exp(dx) * c2_T_c1;
-        last_cost = cost;
+        else{
+            delta /= tr_scale * tr_scale;
+            std::cout << "cost not decreased from " << cost << ", shrinking delta to " << delta << std::endl;
+        }
     }
 }

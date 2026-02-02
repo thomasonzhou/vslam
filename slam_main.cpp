@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
   Sophus::SE3d c2_T_c1_gn;
   bundle_adjustment(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_gn);
 
-  std::cout << "Levenberg Marquardt by hand" << std::endl;
+  std::cout << "Dogleg by hand" << std::endl;
   std::cout << c2_T_c1_gn.matrix() << std::endl;
   return 0;
 }

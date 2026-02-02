@@ -12,7 +12,7 @@ double sum_of_squares_cost(
     const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>& points3d_cam1,
     const std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>>& points2d_img2,
     const PinholeCameraIntrinsics& intrinsics2,
-    Sophus::SE3d& c2_T_c1
+    const Sophus::SE3d& c2_T_c1
 );
 
 Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
