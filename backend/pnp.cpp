@@ -137,7 +137,5 @@ void bundle_adjustment(
         c2_T_c1 = Sophus::SE3d::exp(dx) * c2_T_c1;
         last_cost = cost;
 
-
-
     }
 }
