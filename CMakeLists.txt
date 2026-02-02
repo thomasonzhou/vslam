@@ -36,7 +36,7 @@ target_link_libraries(utils viz Eigen3::Eigen)
 add_library(frontend frontend/orb.cpp)
 target_link_libraries(frontend ${OpenCV_LIBS})
 
-add_library(backend SHARED backend/epipolar.cpp backend/pnp.cpp backend/calib.h)
+add_library(backend SHARED backend/epipolar.cpp backend/pnp.cpp backend/calib.h backend/solvers.cpp)
 target_link_libraries(backend ${OpenCV_LIBS} Eigen3::Eigen)
 
 add_executable(vslam slam_main.cpp)
