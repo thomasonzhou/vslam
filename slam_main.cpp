@@ -3,18 +3,6 @@
 #include "backend/epipolar.h"
 #include <string>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-
-cv::Scalar depthmap_color(double depth){
-  constexpr double upper = 50.0;
-  constexpr double lower = 10.0;
-  constexpr double range = upper - lower;
-
-  if (depth < lower) depth = lower;
-  if (depth > upper) depth = upper;
-  return cv::Scalar(depth * 255.0 / range, 0.0, (1 - (depth / range)) * 255.0);
-}
 
 int main(int argc, char** argv) {
 
@@ -43,11 +31,6 @@ int main(int argc, char** argv) {
   std::vector<cv::DMatch> matches;
   brute_force_match(descriptors1, descriptors2, matches);
 
-  cv::Mat match_img;
-  cv::drawMatches(img1, keypoints1, img2, keypoints2, matches, match_img);
-
-  cv::imshow("matched image", match_img);
-
   // backend
   cv::Mat c1_R_c2;
   cv::Mat t_21;
@@ -58,32 +41,44 @@ int main(int argc, char** argv) {
 
   std::cout << "c1_R_c2 " << c1_R_c2 << std::endl;
   std::cout << "t_21 " << t_21 << std::endl;
-  // evaluate
-  // compare_trajectories();
+
+  // PnP
+  std::string depth_file1 = "../depth1.png";
+  cv::Mat depth1 = cv::imread(depth_file1, cv::IMREAD_UNCHANGED);
 
   std::vector<cv::Point3d> points3d;
-  triangulation(keypoints1, keypoints2, matches, intrinsics1, intrinsics2, c1_R_c2, t_21, points3d);
+  std::vector<cv::Point2d> points2d_img2;
 
-  cv::Mat img1_tri = img1.clone();
-  cv::Mat img2_tri = img2.clone();
-  for (size_t i = 0; i < matches.size(); ++i){
-    cv::Point2d pt1 = pixel_to_camera(keypoints1[matches[i].queryIdx].pt, intrinsics1); 
-    cv::Mat pt2_trans = c1_R_c2 * (cv::Mat_<double>(3, 1) << points3d[i].x, points3d[i].y, points3d[i].z) + t_21;
-    
-    const double depth1 = points3d[i].z;
-    const double depth2 = pt2_trans.at<double>(2, 0);
+  constexpr double depth_scaling = 5000.0;
+  for (const cv::DMatch& match: matches){
+    const cv::Point2d pixel1 = keypoints1[match.queryIdx].pt;
+    unsigned short d = depth1.ptr<unsigned short>(static_cast<int>(pixel1.y))[static_cast<int>(pixel1.x)];
+    if (d <= 0){
+      continue;
+    }
 
-    constexpr int radius = 2;
-    constexpr int thickness = 2;
-    cv::circle(img1_tri, keypoints1[matches[i].queryIdx].pt, radius, depthmap_color(depth1), thickness);
-    cv::circle(img2_tri, keypoints2[matches[i].trainIdx].pt, radius, depthmap_color(depth2), thickness);
+    const double metric_depth = d / depth_scaling;
+    cv::Point2d point1 = pixel_to_camera(pixel1, intrinsics1);
+    points3d.emplace_back(point1.x * metric_depth, point1.y * metric_depth, metric_depth);
+    points2d_img2.push_back(keypoints2[match.trainIdx].pt);
   }
-  cv::namedWindow("img1", cv::WINDOW_NORMAL);
-  cv::namedWindow("img2", cv::WINDOW_NORMAL);
-  cv::imshow("img1", img1_tri);
-  cv::imshow("img2", img2_tri);
 
-  cv::waitKey(0);
+  cv::Mat r_vec;
+  cv::Mat t_vec;
+
+  constexpr bool use_extrinsic_guess = false;
+  cv::solvePnP(points3d, points2d_img2, intrinsics2.K, cv::Mat(), r_vec, t_vec, use_extrinsic_guess);
+
+  cv::Mat R_pnp;
+  cv::Rodrigues(r_vec, R_pnp);
+
+  std::cout << "Comparing results from epipolar geometry vs PnP" << std::endl;
+  std::cout << c1_R_c2 << std::endl;
+  std::cout << R_pnp << std::endl;
+
+  // note how the translation is very different, due to a difference in depth.
+  std::cout << t_21 << std::endl;
+  std::cout << t_vec << std::endl;
 
   return 0;
 }

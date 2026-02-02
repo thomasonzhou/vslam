@@ -1,5 +1,4 @@
 #include "epipolar.h"
-#include <opencv2/calib3d.hpp>
 
 void pose_estimation_2d2d(
     const std::vector<cv::KeyPoint>& keypoints1, 
