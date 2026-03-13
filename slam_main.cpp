@@ -1,7 +1,8 @@
 #include "utils/eval.h"
 #include "frontend/orb.h"
 #include "backend/epipolar.h"
-#include "backend/pnp.h"
+#include "backend/pnp_naive.h"
+#include "core/coordinate_utils.h"
 #include <string>
 #include <opencv2/imgcodecs.hpp>
 
@@ -22,15 +23,15 @@ int main(int argc, char** argv) {
   cv::FAST(img2, keypoints2, FAST_threshold);
 
   // rotated BRIEF descriptors
-  std::vector<Descriptor> descriptors1;
-  std::vector<Descriptor> descriptors2;
+  std::vector<frontend::Descriptor> descriptors1;
+  std::vector<frontend::Descriptor> descriptors2;
 
-  compute_orb(img1, keypoints1, descriptors1);
-  compute_orb(img2, keypoints2, descriptors2);
+  frontend::compute_orb(img1, keypoints1, descriptors1);
+  frontend::compute_orb(img2, keypoints2, descriptors2);
 
   // match
   std::vector<cv::DMatch> matches;
-  brute_force_match(descriptors1, descriptors2, matches);
+  frontend::brute_force_match(descriptors1, descriptors2, matches);
 
   // backend
 
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
     }
 
     const double metric_depth = d / depth_scaling;
-    cv::Point2d point1 = pixel_to_camera(pixel1, intrinsics1);
+    cv::Point2d point1 = core::pixel_to_camera(pixel1, intrinsics1);
     points3d_cam1.emplace_back(point1.x * metric_depth, point1.y * metric_depth, metric_depth);
     points2d_img2.push_back(keypoints2[match.trainIdx].pt);
   }
@@ -70,8 +71,11 @@ int main(int argc, char** argv) {
     points2d_eigen.emplace_back(points2d_img2[i].x, points2d_img2[i].y);
   }
 
+
+
   Sophus::SE3d c2_T_c1_dogleg;
-  bundle_adjustment(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_dogleg);
+  backend::NaivePnPSolver solver;
+  solver.solve(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_dogleg);
 
   std::cout << "Dogleg by hand" << std::endl;
   std::cout << c2_T_c1_dogleg.matrix() << std::endl;
