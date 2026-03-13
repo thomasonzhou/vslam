@@ -1,8 +1,10 @@
-#include "utils/eval.h"
-#include "frontend/orb.h"
 #include "backend/epipolar.h"
 #include "backend/pnp_naive.h"
+#include "backend/pnp_g2o.h"
+#include "calib/calib.h"
 #include "core/coordinate_utils.h"
+#include "frontend/orb.h"
+#include "utils/eval.h"
 #include <string>
 #include <opencv2/imgcodecs.hpp>
 
@@ -40,8 +42,8 @@ int main(int argc, char** argv) {
   // translation from camera 1 to camera 2, add to the pose of camera 2 to get to camera 1 coordinates
   cv::Mat t_12; 
 
-  const PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
-  const PinholeCameraIntrinsics intrinsics2 = intrinsics1;
+  const calib::PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
+  const calib::PinholeCameraIntrinsics intrinsics2 = intrinsics1;
 
   // PnP
   std::string depth_file1 = "../depth1.png";
@@ -73,11 +75,11 @@ int main(int argc, char** argv) {
 
 
 
-  Sophus::SE3d c2_T_c1_dogleg;
-  backend::NaivePnPSolver solver;
-  solver.solve(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_dogleg);
+  Sophus::SE3d c2_T_c1;
+  backend::G2OPnPSolver solver;
+  // backend::NaivePnPSolver solver;
+  solver.solve(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1);
 
-  std::cout << "Dogleg by hand" << std::endl;
-  std::cout << c2_T_c1_dogleg.matrix() << std::endl;
+  std::cout << c2_T_c1.matrix() << std::endl;
   return 0;
 }

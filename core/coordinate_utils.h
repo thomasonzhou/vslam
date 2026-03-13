@@ -3,7 +3,7 @@
 
 namespace core{
 
-    cv::Point2d pixel_to_camera(const cv::Point2d& pixel, const PinholeCameraIntrinsics& intrinsics){
+    cv::Point2d pixel_to_camera(const cv::Point2d& pixel, const calib::PinholeCameraIntrinsics& intrinsics){
         return cv::Point2d((pixel.x - intrinsics.cx()) / intrinsics.fx(),
                             (pixel.y - intrinsics.cy()) / intrinsics.fy());
     };

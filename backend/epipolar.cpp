@@ -4,8 +4,8 @@ void pose_estimation_2d2d(
     const std::vector<cv::KeyPoint>& keypoints1, 
     const std::vector<cv::KeyPoint>& keypoints2,
     const std::vector<cv::DMatch>& matches,
-    const PinholeCameraIntrinsics& intrinsics1,
-    const PinholeCameraIntrinsics& intrinsics2,
+    const calib::PinholeCameraIntrinsics& intrinsics1,
+    const calib::PinholeCameraIntrinsics& intrinsics2,
     cv::Mat& c2_R_c1,
     cv::Mat& t_12
 ){
@@ -38,8 +38,8 @@ void pose_estimation_2d2d(
 
     cv::Mat essential2;
     cv::recoverPose(matched1, matched2, 
-        intrinsics1.K, distortion1, 
-        intrinsics2.K, distortion2, 
+        intrinsics1.camera_matrix_cv(), distortion1, 
+        intrinsics2.camera_matrix_cv(), distortion2, 
         essential2, c2_R_c1, t_12);
 
     std::cout << "essential 2 matrix: " << std::endl << essential2 << std::endl;
@@ -63,8 +63,8 @@ void triangulation(
     const std::vector<cv::KeyPoint>& keypoints1,
     const std::vector<cv::KeyPoint>& keypoints2,
     const std::vector<cv::DMatch>& matches,
-    const PinholeCameraIntrinsics& intrinsics1,
-    const PinholeCameraIntrinsics& intrinsics2,
+    const calib::PinholeCameraIntrinsics& intrinsics1,
+    const calib::PinholeCameraIntrinsics& intrinsics2,
     const cv::Mat& R, 
     const cv::Mat& t, 
     std::vector<cv::Point3d>& points

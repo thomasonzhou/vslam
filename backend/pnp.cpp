@@ -4,7 +4,7 @@
 namespace backend{
     Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
         const Eigen::Vector3d& point3d_cam2,
-        const PinholeCameraIntrinsics& intrinsics2
+        const calib::PinholeCameraIntrinsics& intrinsics2
     ){
 
         const double fx = intrinsics2.fx();
