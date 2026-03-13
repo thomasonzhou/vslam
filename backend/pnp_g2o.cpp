@@ -29,7 +29,8 @@ namespace{
         bool write(std::ostream& out) const override {return true;}
     };
 
-    class EdgeProjection: public g2o::BaseUnaryEdge<2, Eigen::Vector2d, VertexPose>{
+    constexpr int kPixelDims = 2;
+    class EdgeProjection: public g2o::BaseUnaryEdge<kPixelDims, Eigen::Vector2d, VertexPose>{
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
@@ -89,6 +90,30 @@ void G2OPnPSolver::solve(
         )
     );
 
+    g2o::SparseOptimizer optimizer;
+    optimizer.setAlgorithm(solver);
+    optimizer.setVerbose(true);
 
+    int id = 0;
+    VertexPose* v_pose = new VertexPose();
+    v_pose->setEstimate(Sophus::SE3d());
+    v_pose->setId(id++);
+    optimizer.addVertex(v_pose);
+
+    // add all edges
+    for (size_t i = 0; i < std::min(points3d.size(), points2d_img2.size()); ++i){
+        EdgeProjection* edge = new EdgeProjection(points3d[i], intrinsics2);
+        edge->setId(id++);
+        edge->setVertex(0, v_pose);
+        edge->setMeasurement(points2d_img2[i]);
+        edge->setInformation(Eigen::Matrix2d::Identity());
+        optimizer.addEdge(edge);
+    }
+
+    optimizer.initializeOptimization();
+    constexpr int kIters = 10;
+    optimizer.optimize(kIters);
+
+    c2_T_c1 = v_pose->estimate();
 }
 } // namespace backend
