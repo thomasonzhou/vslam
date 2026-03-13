@@ -1,8 +1,8 @@
-#include "utils/utillib.h"
 #include "utils/eval.h"
-#include <string>
-#include <sophus/se3.hpp>
+#include "utils/utillib.h"
 #include <cmath>
+#include <sophus/se3.hpp>
+#include <string>
 
 void compare_trajectories() {
   poseVector est_poses = trajectory_from_file(est_traj);
@@ -12,7 +12,7 @@ void compare_trajectories() {
   trajectory_view gt_view(gt_config, gt_poses);
 
   double mse = 0.0;
-  for (size_t i = 0; i < gt_poses.size(); ++i){
+  for (size_t i = 0; i < gt_poses.size(); ++i) {
     const double error = (gt_poses[i].inverse() * est_poses[i]).log().norm();
     mse += error * error;
   }

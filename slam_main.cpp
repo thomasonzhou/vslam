@@ -1,14 +1,14 @@
 #include "backend/epipolar.h"
-#include "backend/pnp_naive.h"
 #include "backend/pnp_g2o.h"
+#include "backend/pnp_naive.h"
 #include "calib/calib.h"
 #include "core/coordinate_utils.h"
 #include "frontend/orb.h"
 #include "utils/eval.h"
-#include <string>
 #include <opencv2/imgcodecs.hpp>
+#include <string>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
   // frontend
   std::string file1 = "../1.png";
@@ -39,8 +39,9 @@ int main(int argc, char** argv) {
 
   // rotation from camera 1 to camera 2
   cv::Mat c2_R_c1;
-  // translation from camera 1 to camera 2, add to the pose of camera 2 to get to camera 1 coordinates
-  cv::Mat t_12; 
+  // translation from camera 1 to camera 2, add to the pose of camera 2 to get
+  // to camera 1 coordinates
+  cv::Mat t_12;
 
   const calib::PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
   const calib::PinholeCameraIntrinsics intrinsics2 = intrinsics1;
@@ -53,27 +54,30 @@ int main(int argc, char** argv) {
   std::vector<cv::Point2d> points2d_img2;
 
   constexpr double depth_scaling = 5000.0;
-  for (const cv::DMatch& match: matches){
+  for (const cv::DMatch &match : matches) {
     const cv::Point2d pixel1 = keypoints1[match.queryIdx].pt;
-    unsigned short d = depth1.ptr<unsigned short>(static_cast<int>(pixel1.y))[static_cast<int>(pixel1.x)];
-    if (d <= 0){
+    unsigned short d = depth1.ptr<unsigned short>(
+        static_cast<int>(pixel1.y))[static_cast<int>(pixel1.x)];
+    if (d <= 0) {
       continue;
     }
 
     const double metric_depth = d / depth_scaling;
     cv::Point2d point1 = core::pixel_to_camera(pixel1, intrinsics1);
-    points3d_cam1.emplace_back(point1.x * metric_depth, point1.y * metric_depth, metric_depth);
+    points3d_cam1.emplace_back(point1.x * metric_depth, point1.y * metric_depth,
+                               metric_depth);
     points2d_img2.push_back(keypoints2[match.trainIdx].pt);
   }
 
-  std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points3d_eigen;
-  std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> points2d_eigen;
-  for(size_t i = 0; i < points3d_cam1.size(); ++i){
-    points3d_eigen.emplace_back(points3d_cam1[i].x, points3d_cam1[i].y, points3d_cam1[i].z);
+  std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>
+      points3d_eigen;
+  std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>>
+      points2d_eigen;
+  for (size_t i = 0; i < points3d_cam1.size(); ++i) {
+    points3d_eigen.emplace_back(points3d_cam1[i].x, points3d_cam1[i].y,
+                                points3d_cam1[i].z);
     points2d_eigen.emplace_back(points2d_img2[i].x, points2d_img2[i].y);
   }
-
-
 
   Sophus::SE3d c2_T_c1;
   backend::G2OPnPSolver solver;
