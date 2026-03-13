@@ -21,7 +21,7 @@ double sum_of_squares_cost(
         point3d_cam2 = c2_T_c1 * points3d_cam1[i];
         cost += reprojection_error(point3d_cam2, points2d_img2[i], intrinsics2).squaredNorm();
     }
-    return cost;
+    return 0.5 * cost;
 }
 
 

@@ -34,22 +34,22 @@ void bundle_adjustment(
         for (size_t i = 0; i < points3d_cam1.size(); ++i){
             Eigen::Vector3d point3d_cam2 = c2_T_c1 * points3d_cam1[i];
             Eigen::Vector2d error = reprojection_error(point3d_cam2, points2d_img2[i], intrinsics2);
-            cost += error.squaredNorm();
+            cost += 0.5 * error.squaredNorm();
 
             Eigen::Matrix<double, 2, 6> J = error_jacobian_wrt_perturbation(point3d_cam2, intrinsics2);
 
             H_gn += J.transpose() * J;
-            b_gn += -J.transpose() * error;
+            b_gn += J.transpose() * error;
         }
 
-        dx_gn = H_gn.ldlt().solve(b_gn);
+        dx_gn = -H_gn.ldlt().solve(b_gn);
 
         // case 1: full Gauss Newton step
         if (dx_gn.norm() < delta){
             dx = dx_gn;
         }
         else{
-            dx_sd = (b_gn.squaredNorm()) / (b_gn.transpose() * H_gn * b_gn) * b_gn;
+            dx_sd = -(b_gn.squaredNorm()) / (b_gn.transpose() * H_gn * b_gn) * b_gn;
             // case 2: scale steepest descent to trust region boundary
             if (dx_sd.norm() >= delta){
                 dx = (delta / dx_sd.norm()) * dx_sd;
@@ -78,13 +78,13 @@ void bundle_adjustment(
 
         const double actual_reduction = cost - candidate_cost;
         // only the second term requires a negative, give, that b_gn already accounts for the negative
-        const double predicted_reduction = b_gn.dot(dx) - 0.5 * dx.transpose() * H_gn * dx;
+        const double predicted_reduction = b_gn.dot(-dx) - 0.5 * dx.transpose() * H_gn * dx;
 
         const double gain_ratio = actual_reduction / predicted_reduction;
 
         // trust region update
         constexpr double tr_good_model_thresh = 0.75;
-        constexpr double tr_poor_model_thresh = 0.75;
+        constexpr double tr_poor_model_thresh = 0.25;
         constexpr double tr_can_expand_ratio = 0.8;
         constexpr double tr_scale = 2.0;
         if (gain_ratio > 0.0){

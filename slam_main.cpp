@@ -41,11 +41,6 @@ int main(int argc, char** argv) {
 
   const PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
   const PinholeCameraIntrinsics intrinsics2 = intrinsics1;
-  pose_estimation_2d2d(keypoints1, keypoints2, matches, intrinsics1, intrinsics2, c2_R_c1, t_12);
-
-  std::cout << "epipolar geometry" << std::endl;
-  std::cout << c2_R_c1 << std::endl;
-  std::cout << t_12 << std::endl;
 
   // PnP
   std::string depth_file1 = "../depth1.png";
@@ -75,10 +70,10 @@ int main(int argc, char** argv) {
     points2d_eigen.emplace_back(points2d_img2[i].x, points2d_img2[i].y);
   }
 
-  Sophus::SE3d c2_T_c1_gn;
-  bundle_adjustment(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_gn);
+  Sophus::SE3d c2_T_c1_dogleg;
+  bundle_adjustment(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1_dogleg);
 
   std::cout << "Dogleg by hand" << std::endl;
-  std::cout << c2_T_c1_gn.matrix() << std::endl;
+  std::cout << c2_T_c1_dogleg.matrix() << std::endl;
   return 0;
 }
