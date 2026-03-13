@@ -68,20 +68,6 @@ int main(int argc, char** argv) {
     points2d_img2.push_back(keypoints2[match.trainIdx].pt);
   }
 
-  cv::Mat c2_r_c1_vec;
-  cv::Mat t_12_vec;
-
-  constexpr bool use_extrinsic_guess = false;
-  cv::solvePnP(points3d_cam1, points2d_img2, intrinsics2.K, cv::Mat(), c2_r_c1_vec, t_12_vec, use_extrinsic_guess);
-
-  cv::Mat R_pnp;
-  cv::Rodrigues(c2_r_c1_vec, R_pnp);
-  
-  std::cout << "PnP OpenCV" << std::endl;
-  // note how the translation is very different, due to a difference in depth.
-  std::cout << R_pnp << std::endl;
-  std::cout << t_12_vec << std::endl;
-
   std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points3d_eigen;
   std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> points2d_eigen;
   for(size_t i = 0; i < points3d_cam1.size(); ++i){
