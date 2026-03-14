@@ -1,6 +1,4 @@
-#include "backend/epipolar.h"
-#include "backend/pnp_g2o.h"
-#include "backend/pnp_naive.h"
+#include "backend/icp.h"
 #include "calib/calib.h"
 #include "core/coordinate_utils.h"
 #include "frontend/orb.h"
@@ -46,44 +44,51 @@ int main(int argc, char **argv) {
   const calib::PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
   const calib::PinholeCameraIntrinsics intrinsics2 = intrinsics1;
 
-  // PnP
+  // ICP
   std::string depth_file1 = "../depth1.png";
+  std::string depth_file2 = "../depth2.png";
   cv::Mat depth1 = cv::imread(depth_file1, cv::IMREAD_UNCHANGED);
+  cv::Mat depth2 = cv::imread(depth_file2, cv::IMREAD_UNCHANGED);
 
   std::vector<cv::Point3d> points3d_cam1;
-  std::vector<cv::Point2d> points2d_img2;
+  std::vector<cv::Point3d> points3d_cam2;
 
   constexpr double depth_scaling = 5000.0;
   for (const cv::DMatch &match : matches) {
     const cv::Point2d pixel1 = keypoints1[match.queryIdx].pt;
-    unsigned short d = depth1.ptr<unsigned short>(
+    unsigned short d1 = depth1.ptr<unsigned short>(
         static_cast<int>(pixel1.y))[static_cast<int>(pixel1.x)];
-    if (d <= 0) {
-      continue;
-    }
+    if (d1 <= 0) continue;
 
-    const double metric_depth = d / depth_scaling;
-    cv::Point2d point1 = core::pixel_to_camera(pixel1, intrinsics1);
-    points3d_cam1.emplace_back(point1.x * metric_depth, point1.y * metric_depth,
-                               metric_depth);
-    points2d_img2.push_back(keypoints2[match.trainIdx].pt);
+    const cv::Point2d pixel2 = keypoints1[match.trainIdx].pt;
+    unsigned short d2 = depth2.ptr<unsigned short>(
+      static_cast<int>(pixel2.y))[static_cast<int>(pixel2.x)];
+    if (d2 <= 0) continue;
+
+    const double metric_depth1 = d1 / depth_scaling;
+    const cv::Point2d point1 = core::pixel_to_camera(pixel1, intrinsics1);
+    points3d_cam1.emplace_back(point1.x * metric_depth1, point1.y * metric_depth1,
+                               metric_depth1);
+
+    const double metric_depth2 = d2 / depth_scaling;
+    const cv::Point2d point2 = core::pixel_to_camera(pixel2, intrinsics2);
+    points3d_cam2.emplace_back(point2.x * metric_depth2, point2.y * metric_depth2, metric_depth2);
   }
 
   std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>
-      points3d_eigen;
-  std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>>
-      points2d_eigen;
+      points3d_eigen1;
+  std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>
+      points3d_eigen2;
   for (size_t i = 0; i < points3d_cam1.size(); ++i) {
-    points3d_eigen.emplace_back(points3d_cam1[i].x, points3d_cam1[i].y,
+    points3d_eigen1.emplace_back(points3d_cam1[i].x, points3d_cam1[i].y,
                                 points3d_cam1[i].z);
-    points2d_eigen.emplace_back(points2d_img2[i].x, points2d_img2[i].y);
+    points3d_eigen2.emplace_back(points3d_cam2[i].x, points3d_cam2[i].y,
+                                points3d_cam2[i].z);
   }
 
   Sophus::SE3d c2_T_c1;
-  backend::G2OPnPSolver solver;
-  // backend::NaivePnPSolver solver;
-  solver.solve(points3d_eigen, points2d_eigen, intrinsics2, c2_T_c1);
-
+  
+  backend::point_to_point_svd(points3d_eigen1, points3d_eigen2, c2_T_c1);
   std::cout << c2_T_c1.matrix() << std::endl;
   return 0;
 }
