@@ -3,6 +3,7 @@
 #include "core/coordinate_utils.h"
 #include "frontend/orb.h"
 #include "utils/eval.h"
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <string>
 
@@ -13,21 +14,25 @@ int main(int argc, char **argv) {
   std::string file2 = "../2.png";
   cv::Mat img1 = cv::imread(file1, cv::IMREAD_COLOR);
   cv::Mat img2 = cv::imread(file2, cv::IMREAD_COLOR);
+  cv::Mat img1_gray;
+  cv::Mat img2_gray;
+  cv::cvtColor(img1, img1_gray, cv::COLOR_BGR2GRAY);
+  cv::cvtColor(img2, img2_gray, cv::COLOR_BGR2GRAY);
 
   // oriented FAST keypoints
   std::vector<cv::KeyPoint> keypoints1;
   std::vector<cv::KeyPoint> keypoints2;
 
   constexpr int FAST_threshold = 40;
-  cv::FAST(img1, keypoints1, FAST_threshold);
-  cv::FAST(img2, keypoints2, FAST_threshold);
+  cv::FAST(img1_gray, keypoints1, FAST_threshold);
+  cv::FAST(img2_gray, keypoints2, FAST_threshold);
 
   // rotated BRIEF descriptors
   std::vector<frontend::Descriptor> descriptors1;
   std::vector<frontend::Descriptor> descriptors2;
 
-  frontend::compute_orb(img1, keypoints1, descriptors1);
-  frontend::compute_orb(img2, keypoints2, descriptors2);
+  frontend::compute_orb(img1_gray, keypoints1, descriptors1);
+  frontend::compute_orb(img2_gray, keypoints2, descriptors2);
 
   // match
   std::vector<cv::DMatch> matches;
@@ -60,7 +65,7 @@ int main(int argc, char **argv) {
         static_cast<int>(pixel1.y))[static_cast<int>(pixel1.x)];
     if (d1 <= 0) continue;
 
-    const cv::Point2d pixel2 = keypoints1[match.trainIdx].pt;
+    const cv::Point2d pixel2 = keypoints2[match.trainIdx].pt;
     unsigned short d2 = depth2.ptr<unsigned short>(
       static_cast<int>(pixel2.y))[static_cast<int>(pixel2.x)];
     if (d2 <= 0) continue;
