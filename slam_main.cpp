@@ -1,4 +1,5 @@
 #include "backend/icp_svd.h"
+#include "backend/icp_nonlinear.h"
 #include "calib/calib.h"
 #include "core/coordinate_utils.h"
 #include "frontend/orb.h"
@@ -39,12 +40,6 @@ int main(int argc, char **argv) {
   frontend::brute_force_match(descriptors1, descriptors2, matches);
 
   // backend
-
-  // rotation from camera 1 to camera 2
-  cv::Mat c2_R_c1;
-  // translation from camera 1 to camera 2, add to the pose of camera 2 to get
-  // to camera 1 coordinates
-  cv::Mat t_12;
 
   const calib::PinholeCameraIntrinsics intrinsics1(521.0, 521.0, 325.1, 249.7);
   const calib::PinholeCameraIntrinsics intrinsics2 = intrinsics1;
@@ -93,7 +88,8 @@ int main(int argc, char **argv) {
 
   Sophus::SE3d c2_T_c1;
 
-  backend::SVD_ICPSolver solver;
+  // backend::SVD_ICPSolver solver;
+  backend::NonlinearICPSolver solver;
   
   solver.solve(points3d_eigen1, points3d_eigen2, c2_T_c1);
   std::cout << c2_T_c1.matrix() << std::endl;

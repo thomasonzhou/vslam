@@ -46,7 +46,7 @@ struct SVD_ICPSolver : public ICPSolver {
     const Eigen::Matrix3d R = U * D * V.transpose();
     c2_T_c1.setRotationMatrix(R);
 
-    const Eigen::Vector3d t = centroid1 - R * centroid2;
+    const Eigen::Vector3d t = centroid2 - R * centroid1;
     c2_T_c1.translation() = t;
   }
 };
