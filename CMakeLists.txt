@@ -38,7 +38,6 @@ target_link_libraries(frontend ${OpenCV_LIBS})
 
 add_library(backend SHARED
     backend/epipolar.cpp
-    backend/icp.cpp
     backend/pnp.cpp
     backend/pnp_g2o.cpp
     backend/solvers.cpp

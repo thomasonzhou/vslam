@@ -1,4 +1,4 @@
-#include "backend/icp.h"
+#include "backend/icp_svd.h"
 #include "calib/calib.h"
 #include "core/coordinate_utils.h"
 #include "frontend/orb.h"
@@ -92,8 +92,10 @@ int main(int argc, char **argv) {
   }
 
   Sophus::SE3d c2_T_c1;
+
+  backend::SVD_ICPSolver solver;
   
-  backend::point_to_point_svd(points3d_eigen1, points3d_eigen2, c2_T_c1);
+  solver.solve(points3d_eigen1, points3d_eigen2, c2_T_c1);
   std::cout << c2_T_c1.matrix() << std::endl;
   return 0;
 }

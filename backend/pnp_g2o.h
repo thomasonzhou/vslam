@@ -4,8 +4,7 @@
 namespace backend {
 
 struct G2OPnPSolver : public PnPSolver {
-  virtual void
-  solve(const std::vector<Eigen::Vector3d,
+  void solve(const std::vector<Eigen::Vector3d,
                           Eigen::aligned_allocator<Eigen::Vector3d>> &points3d,
         const std::vector<Eigen::Vector2d,
                           Eigen::aligned_allocator<Eigen::Vector2d>>
