@@ -30,8 +30,8 @@ endforeach()
 add_library(viz SHARED viz/vizlib.cpp)
 target_link_libraries(viz ${PANGOLIN_LIBS_FILTERED})
 
-add_library(utils SHARED utils/utillib.cpp utils/eval.cpp)
-target_link_libraries(utils viz Eigen3::Eigen)
+add_library(util SHARED util/utillib.cpp util/eval.cpp)
+target_link_libraries(util viz Eigen3::Eigen)
 
 add_library(frontend frontend/orb.cpp)
 target_link_libraries(frontend ${OpenCV_LIBS})
@@ -52,4 +52,4 @@ target_link_libraries(backend
 )
 
 add_executable(vslam slam_main.cpp)
-target_link_libraries(vslam viz utils frontend backend)
+target_link_libraries(vslam viz util frontend backend)
