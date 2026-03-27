@@ -52,4 +52,4 @@ target_link_libraries(backend
 )
 
 add_executable(vslam slam_main.cpp)
-target_link_libraries(vslam viz util frontend backend)
+target_link_libraries(vslam viz util frontend backend ${OpenCV_LIBS})
