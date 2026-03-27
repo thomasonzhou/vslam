@@ -7,5 +7,5 @@ namespace util {
     
     const auto gt_config = pangolin_config().trajectory_color("blue");
 
-    void compare_trajectories(const std::string &est_traj, const std::string &gt_traj);
+    void compare_trajectories(const std::string &est_traj, const std::string &gt_traj, const bool align_traj);
 }  // namespace util
