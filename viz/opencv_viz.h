@@ -1,0 +1,42 @@
+#include <opencv2/highgui.hpp>
+
+namespace viz {
+
+void viz_match(
+    const cv::Mat &img1, 
+    const cv::Mat &img2, 
+    const std::vector<cv::Point2f> &p1,
+    const std::vector<cv::Point2f> &p2,
+    const std::vector<unsigned char> &match_status
+){
+
+  cv::Mat full_img_gray;
+  cv::hconcat(img1, img2, full_img_gray);
+
+  cv::Mat full_img;
+  if (full_img_gray.channels() == 1){
+    cv::cvtColor(full_img_gray, full_img, cv::COLOR_GRAY2BGR);
+  }
+  else{
+    full_img = full_img_gray;
+  }
+  
+  const int kRadius = 3;
+  const cv::Scalar kGreen(0, 255, 0);
+  const cv::Scalar kRed(0, 0, 255);
+  for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){
+      if(!match_status[i]) continue;
+      
+      const cv::Point2f pt1 = p1[i];
+      const cv::Point2f pt2 = p2[i] + cv::Point2f(static_cast<double>(img1.cols), 0.0);
+      
+      cv::circle(full_img, pt1, kRadius, kGreen);
+      cv::circle(full_img, pt2, kRadius, kGreen);
+      cv::line(full_img, pt1, pt2, kRed);
+  }
+  
+  cv::imshow("LK Optical Flow Match", full_img);
+  cv::waitKey(0);
+}
+  
+}  // namespace viz
