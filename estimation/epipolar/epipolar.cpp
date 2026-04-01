@@ -4,8 +4,8 @@ namespace estimation::epipolar {
   void pose_estimation_2d2d(const std::vector<cv::KeyPoint> &keypoints1,
                             const std::vector<cv::KeyPoint> &keypoints2,
                             const std::vector<cv::DMatch> &matches,
-                            const calib::PinholeCameraIntrinsics &intrinsics1,
-                            const calib::PinholeCameraIntrinsics &intrinsics2,
+                            const geometry::PinholeCameraIntrinsics &intrinsics1,
+                            const geometry::PinholeCameraIntrinsics &intrinsics2,
                             cv::Mat &c2_R_c1, cv::Mat &t_12) {
     std::vector<cv::Point2d> matched1;
     std::vector<cv::Point2d> matched2;
@@ -45,13 +45,13 @@ namespace estimation::epipolar {
 
     // verify epipolar constraint
 
-    const cv::Mat E = core::hat(t_12) * c2_R_c1;
+    const cv::Mat E = geometry::hat(t_12) * c2_R_c1;
 
     for (int i = 0; i < matches.size(); ++i) {
-      cv::Mat p1 = core::homogenous_coordinates(
-          core::pixel_to_camera(matched1[i], intrinsics1));
-      cv::Mat p2 = core::homogenous_coordinates(
-          core::pixel_to_camera(matched2[i], intrinsics2));
+      cv::Mat p1 = geometry::homogenous_coordinates(
+          geometry::pixel_to_camera(matched1[i], intrinsics1));
+      cv::Mat p2 = geometry::homogenous_coordinates(
+          geometry::pixel_to_camera(matched2[i], intrinsics2));
 
       const cv::Mat epipolar_constraint = p2.t() * E * p1;
       std::cout << epipolar_constraint << std::endl;
@@ -61,8 +61,8 @@ namespace estimation::epipolar {
   void triangulation(const std::vector<cv::KeyPoint> &keypoints1,
                     const std::vector<cv::KeyPoint> &keypoints2,
                     const std::vector<cv::DMatch> &matches,
-                    const calib::PinholeCameraIntrinsics &intrinsics1,
-                    const calib::PinholeCameraIntrinsics &intrinsics2,
+                    const geometry::PinholeCameraIntrinsics &intrinsics1,
+                    const geometry::PinholeCameraIntrinsics &intrinsics2,
                     const cv::Mat &R, const cv::Mat &t,
                     std::vector<cv::Point3d> &points) {
 
@@ -71,9 +71,9 @@ namespace estimation::epipolar {
 
     for (const cv::DMatch &match : matches) {
       points1.push_back(
-          core::pixel_to_camera(keypoints1[match.queryIdx].pt, intrinsics1));
+          geometry::pixel_to_camera(keypoints1[match.queryIdx].pt, intrinsics1));
       points2.push_back(
-          core::pixel_to_camera(keypoints2[match.trainIdx].pt, intrinsics2));
+          geometry::pixel_to_camera(keypoints2[match.trainIdx].pt, intrinsics2));
     }
 
     cv::Mat T1 = (cv::Mat_<double>(3, 4) << 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0);

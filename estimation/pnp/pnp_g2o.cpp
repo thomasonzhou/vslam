@@ -34,7 +34,7 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
   EdgeProjection(const Eigen::Vector3d &pos3d,
-                 const calib::PinholeCameraIntrinsics &intrinsics)
+                 const geometry::PinholeCameraIntrinsics &intrinsics)
       : pos3d_(pos3d), intrinsics_(intrinsics) {};
 
   void computeError() override {
@@ -68,7 +68,7 @@ public:
 
 private:
   Eigen::Vector3d pos3d_;
-  const calib::PinholeCameraIntrinsics &intrinsics_;
+  const geometry::PinholeCameraIntrinsics &intrinsics_;
 };
 
 constexpr int kLandmarkDim = 3;
@@ -85,7 +85,7 @@ void G2OPnPSolver::solve(
                       Eigen::aligned_allocator<Eigen::Vector3d>> &points3d,
     const std::vector<Eigen::Vector2d,
                       Eigen::aligned_allocator<Eigen::Vector2d>> &points2d_img2,
-    const calib::PinholeCameraIntrinsics &intrinsics2,
+    const geometry::PinholeCameraIntrinsics &intrinsics2,
     Sophus::SE3d &c2_T_c1) const {
 
   auto solver = new g2o::OptimizationAlgorithmGaussNewton(

@@ -1,13 +1,7 @@
 #pragma once
 #include <opencv2/core.hpp>
 
-namespace core {
-
-cv::Point2d pixel_to_camera(const cv::Point2d &pixel,
-                            const calib::PinholeCameraIntrinsics &intrinsics) {
-  return cv::Point2d((pixel.x - intrinsics.cx()) / intrinsics.fx(),
-                     (pixel.y - intrinsics.cy()) / intrinsics.fy());
-};
+namespace geometry {
 
 cv::Mat homogenous_coordinates(const cv::Point2d &xy) {
   return (cv::Mat_<double>(3, 1) << xy.x, xy.y, 1.0);
@@ -20,4 +14,4 @@ cv::Mat hat(const cv::Mat &t) {
   return (cv::Mat_<double>(3, 3) << 0, -z, y, z, 0, -x, -y, x, 0);
 };
 
-}; // namespace core
+}; // namespace geometry

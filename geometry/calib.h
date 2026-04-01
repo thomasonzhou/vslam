@@ -2,7 +2,7 @@
 #include <Eigen/Core>
 #include <opencv2/core.hpp>
 
-namespace calib {
+namespace geometry {
 
 struct PinholeCameraIntrinsics {
   Eigen::Matrix3d K;
@@ -22,4 +22,11 @@ struct PinholeCameraIntrinsics {
             K(2, 0), K(2, 1), K(2, 2));
   }
 };
-}; // namespace calib
+
+cv::Point2d pixel_to_camera(const cv::Point2d &pixel,
+                            const PinholeCameraIntrinsics &intrinsics) {
+  return cv::Point2d((pixel.x - intrinsics.cx()) / intrinsics.fx(),
+                     (pixel.y - intrinsics.cy()) / intrinsics.fy());
+};
+
+}; // namespace geometry
