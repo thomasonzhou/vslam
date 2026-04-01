@@ -4,7 +4,7 @@
 #include <sophus/se3.hpp>
 #include <vector>
 
-namespace backend{
+namespace estimation::icp{
     struct ICPSolver {
         virtual ~ICPSolver() = default;
         virtual void solve(
@@ -14,4 +14,4 @@ namespace backend{
         ) const = 0;
 
     };
-} // namespace backend
+} // namespace estimation::icp

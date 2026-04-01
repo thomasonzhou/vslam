@@ -2,7 +2,7 @@
 #include "calib/calib.h"
 #include <sophus/se3.hpp>
 
-namespace backend {
+namespace geometry {
 
 Eigen::Vector2d
 reprojection_error(const Eigen::Vector3d &point3d_cam2,
@@ -24,4 +24,4 @@ Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
 Eigen::Vector2d
 camera_to_pixel(const Eigen::Vector3d &point3d,
                 const calib::PinholeCameraIntrinsics &intrinsics);
-}; // namespace backend
+}; // namespace geometry

@@ -1,4 +1,4 @@
-#include "backend/icp_nonlinear.h"
+#include "estimation/icp/icp_nonlinear.h"
 #include <g2o/core/base_vertex.h>
 #include <sophus/se3.hpp>
 #include <g2o/core/base_unary_edge.h>
@@ -65,7 +65,7 @@ namespace {
 
 }  // namespace
 
-namespace backend {
+namespace estimation::icp {
     void NonlinearICPSolver::solve(
         const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>
             &points3d_cam1,
@@ -103,4 +103,4 @@ namespace backend {
     };
   
 
-}  // namespace backend
+}  // namespace estimation::icp

@@ -1,6 +1,6 @@
-#include "backend/solvers.h"
+#include "geometry/reprojection.h"
 
-namespace backend {
+namespace geometry {
 Eigen::Vector2d
 reprojection_error(const Eigen::Vector3d &point3d_cam2,
                    const Eigen::Vector2d &point2d_img2,
@@ -34,4 +34,4 @@ camera_to_pixel(const Eigen::Vector3d &point3d,
       intrinsics.fx() * point3d[0] / point3d[2] + intrinsics.cx(),
       intrinsics.fy() * point3d[1] / point3d[2] + intrinsics.cy());
 }
-}; // namespace backend
+}; // namespace geometry

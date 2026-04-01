@@ -1,7 +1,7 @@
-#include "backend/pnp.h"
+#include "estimation/pnp/pnp.h"
 #include <iostream>
 
-namespace backend {
+namespace estimation::pnp {
 Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
     const Eigen::Vector3d &point3d_cam2,
     const calib::PinholeCameraIntrinsics &intrinsics2) {
@@ -23,4 +23,4 @@ Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
   return J;
 }
 
-}; // namespace backend
+}; // namespace estimation::pnp

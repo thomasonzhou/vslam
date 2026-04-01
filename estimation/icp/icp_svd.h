@@ -1,11 +1,11 @@
 #pragma once
 
-#include "backend/icp.h"
+#include "estimation/icp/icp.h"
 
 #include <Eigen/SVD>
 #include <algorithm>
 
-namespace backend {
+namespace estimation::icp {
 struct SVD_ICPSolver : public ICPSolver {
   void solve(
       const std::vector<Eigen::Vector3d,
@@ -51,4 +51,4 @@ struct SVD_ICPSolver : public ICPSolver {
   }
 };
 
-} // namespace backend
+} // namespace estimation::icp

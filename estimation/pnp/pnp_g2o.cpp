@@ -1,4 +1,4 @@
-#include "backend/pnp_g2o.h"
+#include "estimation/pnp/pnp_g2o.h"
 
 #include <g2o/core/base_unary_edge.h>
 #include <g2o/core/base_vertex.h>
@@ -79,7 +79,7 @@ typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType>
     LinearSolverType;
 } // namespace
 
-namespace backend {
+namespace estimation::pnp {
 void G2OPnPSolver::solve(
     const std::vector<Eigen::Vector3d,
                       Eigen::aligned_allocator<Eigen::Vector3d>> &points3d,
@@ -117,4 +117,4 @@ void G2OPnPSolver::solve(
 
   c2_T_c1 = v_pose->estimate();
 }
-} // namespace backend
+} // namespace estimation::pnp

@@ -33,17 +33,21 @@ target_link_libraries(viz ${PANGOLIN_LIBS_FILTERED})
 add_library(util SHARED util/utillib.cpp util/eval.cpp)
 target_link_libraries(util viz Eigen3::Eigen)
 
-add_library(frontend frontend/orb.cpp)
-target_link_libraries(frontend ${OpenCV_LIBS})
-
-add_library(backend SHARED
-    backend/epipolar.cpp
-    backend/icp_nonlinear.cpp
-    backend/pnp.cpp
-    backend/pnp_g2o.cpp
-    backend/solvers.cpp
+add_library(estimation 
+    estimation/epipolar/epipolar.cpp
+    estimation/icp/icp_nonlinear.cpp
+    estimation/pnp/pnp.cpp
+    estimation/pnp/pnp_g2o.cpp 
 )
-target_link_libraries(backend
+add_library(geometry SHARED geometry/reprojection.cpp)
+target_link_libraries(geometry PUBLIC Eigen3::Eigen)
+
+target_link_libraries(estimation PUBLIC Eigen3::Eigen geometry PRIVATE g2o::core)
+
+add_library(frontend frontend/orb.cpp frontend/optical_flow.cpp)
+target_link_libraries(frontend ${OpenCV_LIBS} estimation)
+
+target_link_libraries(estimation
     PUBLIC
         Eigen3::Eigen
     PRIVATE
@@ -52,4 +56,4 @@ target_link_libraries(backend
 )
 
 add_executable(vslam slam_main.cpp)
-target_link_libraries(vslam viz util frontend backend ${OpenCV_LIBS})
+target_link_libraries(vslam viz util frontend estimation ${OpenCV_LIBS})

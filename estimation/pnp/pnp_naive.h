@@ -1,8 +1,8 @@
 #pragma once
 
-#include "backend/pnp.h"
+#include "estimation/pnp/pnp.h"
 
-namespace backend {
+namespace estimation::pnp {
 
 struct NaivePnPSolver : public PnPSolver {
 
@@ -122,4 +122,4 @@ struct NaivePnPSolver : public PnPSolver {
   }
 };
 
-}; // namespace backend
+}; // namespace estimation::pnp

@@ -1,10 +1,10 @@
 #pragma once
-#include "backend/solvers.h"
+#include "geometry/reprojection.h"
 #include "calib/calib.h"
 #include <sophus/se3.hpp>
 #include <vector>
 
-namespace backend {
+namespace estimation::pnp {
 Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
     const Eigen::Vector3d &point3d_cam2,
     const calib::PinholeCameraIntrinsics &intrinsics2);
@@ -21,4 +21,4 @@ struct PnPSolver {
         Sophus::SE3d &c2_T_c1) const = 0;
 };
 
-}; // namespace backend
+}; // namespace estimation::pnp

@@ -1,7 +1,7 @@
 #pragma once
-#include "backend/pnp.h"
+#include "estimation/pnp/pnp.h"
 
-namespace backend {
+namespace estimation::pnp {
 
 struct G2OPnPSolver : public PnPSolver {
   void solve(const std::vector<Eigen::Vector3d,
@@ -13,4 +13,4 @@ struct G2OPnPSolver : public PnPSolver {
         Sophus::SE3d &c2_T_c1) const override;
 };
 
-}; // namespace backend
+}; // namespace estimation::pnp
