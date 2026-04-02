@@ -2,7 +2,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <vector>
 #include <opencv2/imgproc.hpp>
-// #include <opencv2/video/tracking.hpp>
 #include "frontend/optical_flow.h"
 #include "viz/opencv_viz.h"
 
@@ -24,7 +23,6 @@ int main(int argc, char **argv) {
   std::vector<bool> status;
   std::vector<double> error;
   std::vector<cv::Point2d> p2;
-  // cv::calcOpticalFlowPyrLK(img1, img2, p1, p2, status, error);
   frontend::optical_flow_pyramid(img1, img2, p1, p2, status, error);
 
   viz::viz_match(img1, img2, p1, p2, status);
