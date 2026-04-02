@@ -2,7 +2,8 @@
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
 #include "geometry/bilinear.h"
-#include <iostream>
+#include <array>
+#include <opencv2/imgproc.hpp>
 
 
 namespace frontend {
@@ -22,9 +23,8 @@ void OpticalFlowTracker::trackFeatures(const cv::Range &range){
 
         Eigen::Matrix2d H = Eigen::Matrix2d::Zero();
         Eigen::Vector2d b = Eigen::Vector2d::Zero();
-        Eigen::Vector2d J = Eigen::Vector2d::Zero();
 
-        status_[i] = true; // successful unless something goes wrong
+        status_[i] = true; 
 
         for (int iter = 0; iter < kMaxIter; ++iter){
 
@@ -36,24 +36,22 @@ void OpticalFlowTracker::trackFeatures(const cv::Range &range){
             const cv::Point2d kp2_pred = kp1 + cv::Point2d(dx, dy);
             for(int r = -kHalfPatchSize; r < kHalfPatchSize; ++r){
                 for(int c = -kHalfPatchSize; c < kHalfPatchSize; ++c){
-                    const double diff_y = dy + r;
-                    const double diff_x = dx + c;
 
-                    const double value1 = geometry::bilinear_interpolation(img1_, kp1.x + diff_x, kp1.y + diff_y);
-                    const double value2 = geometry::bilinear_interpolation(img2_, kp2_pred.x + diff_x, kp2_pred.y + diff_y);
+                    const double value1 = geometry::bilinear_interpolation(img1_, kp1.x + c, kp1.y + r);
+                    const double value2 = geometry::bilinear_interpolation(img2_, kp2_pred.x + c, kp2_pred.y + r);
 
                     const double error = value2 - value1;
 
-                    // central difference method
+                    // central difference
                     const double grad_x = 0.5 * (
-                        geometry::bilinear_interpolation(img2_, kp2_pred.x + diff_x + 1, kp2_pred.y + diff_y) - 
-                        geometry::bilinear_interpolation(img2_, kp2_pred.x + diff_x - 1, kp2_pred.y + diff_y)
+                        geometry::bilinear_interpolation(img2_, kp2_pred.x + c + 1, kp2_pred.y + r) - 
+                        geometry::bilinear_interpolation(img2_, kp2_pred.x + c - 1, kp2_pred.y + r)
                     );
                     const double grad_y = 0.5 * (
-                        geometry::bilinear_interpolation(img2_, kp2_pred.x + diff_x, kp2_pred.y + diff_y + 1) - 
-                        geometry::bilinear_interpolation(img2_, kp2_pred.x + diff_x, kp2_pred.y + diff_y - 1)
+                        geometry::bilinear_interpolation(img2_, kp2_pred.x + c, kp2_pred.y + r + 1) - 
+                        geometry::bilinear_interpolation(img2_, kp2_pred.x + c, kp2_pred.y + r - 1)
                     );
-                    J = Eigen::Vector2d(grad_x, grad_y);
+                    const Eigen::Vector2d J(grad_x, grad_y);
 
                     H += J * J.transpose();
                     b += -error * J;
@@ -65,7 +63,6 @@ void OpticalFlowTracker::trackFeatures(const cv::Range &range){
 
             if (std::isnan(update[0]) || std::isnan(update[1])){
                 status_[i] = false;
-                std::cout << "Invalid update" << std::endl;
                 break;
             }
 
@@ -83,6 +80,7 @@ void OpticalFlowTracker::trackFeatures(const cv::Range &range){
 
             prev_cost = cost;
         }
+        error_[i] = cost;
         p2_[i] = kp1 + cv::Point2d(dx, dy);
     }
 }
@@ -103,5 +101,67 @@ void optical_flow_one_level(
     cv::parallel_for_(cv::Range(0, static_cast<int>(p1.size())), [&](const cv::Range &range){
         tracker.trackFeatures(range);
     });
+}
+
+
+void optical_flow_pyramid(
+    const cv::Mat &img1,
+    const cv::Mat &img2,
+    const std::vector<cv::Point2d> &p1,
+    std::vector<cv::Point2d> &p2,
+    std::vector<bool> &status,
+    std::vector<double> &error
+){
+    constexpr int kPyramids = 4;
+    constexpr double kPyramidScale = 0.5;
+    constexpr std::array<double, kPyramids> kScales {1.0, 0.5, 0.25, 0.125};
+
+    std::vector<cv::Mat> pyr1;
+    std::vector<cv::Mat> pyr2;
+    pyr1.reserve(kPyramids);
+    pyr2.reserve(kPyramids);
+    for (size_t i = 0; i < kPyramids; ++i){
+        if (kScales[i] == 1.0){
+            pyr1.emplace_back(img1);
+            pyr2.emplace_back(img2);
+        }
+        else{
+            pyr1.emplace_back();
+            pyr2.emplace_back();
+
+            const cv::Mat &prev_pyr1 = pyr1[i - 1];
+            cv::resize(
+                prev_pyr1, pyr1.back(), 
+                cv::Size(prev_pyr1.cols * kPyramidScale, prev_pyr1.rows * kPyramidScale)
+            );
+            const cv::Mat &prev_pyr2 = pyr2[i - 1];
+            cv::resize(
+                prev_pyr2, pyr2.back(), 
+                cv::Size(prev_pyr2.cols * kPyramidScale, prev_pyr2.rows * kPyramidScale)
+            );
+        }
+    }
+    
+    std::vector<cv::Point2d> pyr_p1;
+    std::vector<cv::Point2d> pyr_p2;
+    for(const auto& kp: p1){
+        pyr_p1.emplace_back(kScales.back() * kp);
+        pyr_p2.emplace_back(kScales.back() * kp);
+    }
+
+    for(int level = kScales.size() - 1; level >= 0; --level){
+        optical_flow_one_level(pyr1[level], pyr2[level], pyr_p1, pyr_p2, status, error);
+
+        if (level > 0){
+            for(size_t i = 0; i < pyr_p1.size(); ++i){
+                pyr_p1[i] /= kPyramidScale;
+                pyr_p2[i] /= kPyramidScale;
+            }
+        }
+        else{
+            p2 = pyr_p2;
+        }
+
+    }
 }
 }  // namespace frontend

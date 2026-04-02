@@ -40,5 +40,13 @@ void optical_flow_one_level(
     std::vector<double> &error
 );
     
+void optical_flow_pyramid(
+    const cv::Mat &img1,
+    const cv::Mat &img2,
+    const std::vector<cv::Point2d> &p1,
+    std::vector<cv::Point2d> &p2,
+    std::vector<bool> &status,
+    std::vector<double> &error
+);
 
 }  // namespace frontend
