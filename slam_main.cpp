@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   std::vector<double> error;
   std::vector<cv::Point2d> p2;
   // cv::calcOpticalFlowPyrLK(img1, img2, p1, p2, status, error);
-  frontend::OpticalFlowTracker tracker(img1, img2, p1, p2, status, error);
+  frontend::optical_flow_one_level(img1, img2, p1, p2, status, error);
 
   viz::viz_match(img1, img2, p1, p2, status);
 

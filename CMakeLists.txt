@@ -36,7 +36,6 @@ target_link_libraries(util viz Eigen3::Eigen)
 add_library(estimation 
     estimation/epipolar/epipolar.cpp
     estimation/icp/icp_nonlinear.cpp
-    estimation/pnp/pnp.cpp
     estimation/pnp/pnp_g2o.cpp 
 )
 add_library(geometry SHARED geometry/reprojection.cpp)

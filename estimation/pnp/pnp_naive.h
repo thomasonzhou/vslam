@@ -4,6 +4,27 @@
 
 namespace estimation::pnp {
 
+Eigen::Matrix<double, 2, 6> pixel_error_jacobian_wrt_perturbation(
+    const Eigen::Vector3d &point3d_cam2,
+    const geometry::PinholeCameraIntrinsics &intrinsics2) {
+
+  const double fx = intrinsics2.fx();
+  const double fy = intrinsics2.fy();
+  const double cx = intrinsics2.cx();
+  const double cy = intrinsics2.cy();
+
+  Eigen::Matrix<double, 2, 6> J;
+  const double x = point3d_cam2[0];
+  const double y = point3d_cam2[1];
+  const double z = point3d_cam2[2];
+  const double z2 = z * z;
+
+  J << -fx / z, 0, fx * x / z2, fx * x * y / z2, -fx - fx * x * x / z2,
+      fx * y / z, 0, -fy / z, fy * y / z2, fy + fy * y * y / z2,
+      -fy * y * x / z2, -fy * x / z;
+  return J;
+}
+
 struct NaivePnPSolver : public PnPSolver {
 
   void solve(const std::vector<Eigen::Vector3d,
@@ -16,7 +37,7 @@ struct NaivePnPSolver : public PnPSolver {
              Sophus::SE3d &c2_T_c1) const override {
     constexpr int max_iterations = 10;
     // pertubation norm threshold
-    constexpr double convergence_epsilon = 1e-6;
+    constexpr double kConvergenceEpsilon = 1e-6;
 
     // dogleg
     double delta = 1.0;
@@ -45,7 +66,7 @@ struct NaivePnPSolver : public PnPSolver {
         cost += 0.5 * error.squaredNorm();
 
         Eigen::Matrix<double, 2, 6> J =
-            error_jacobian_wrt_perturbation(point3d_cam2, intrinsics2);
+            pixel_error_jacobian_wrt_perturbation(point3d_cam2, intrinsics2);
 
         H_gn += J.transpose() * J;
         b_gn += J.transpose() * error;
@@ -78,7 +99,7 @@ struct NaivePnPSolver : public PnPSolver {
         }
       }
 
-      if (dx.norm() < convergence_epsilon) {
+      if (dx.norm() < kConvergenceEpsilon) {
         std::cout << "converged, breaking" << std::endl;
         break;
       }

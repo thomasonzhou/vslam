@@ -27,8 +27,8 @@ void viz_match(
   for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){
       if(!match_status[i]) continue;
       
-      const cv::Point2f pt1 = p1[i];
-      const cv::Point2f pt2 = p2[i] + cv::Point2d(static_cast<double>(img1.cols), 0.0);
+      const cv::Point2d pt1 = p1[i];
+      const cv::Point2d pt2 = p2[i] + cv::Point2d(static_cast<double>(img1.cols), 0.0);
       
       cv::circle(full_img, pt1, kRadius, kGreen);
       cv::circle(full_img, pt2, kRadius, kGreen);

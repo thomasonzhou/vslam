@@ -5,9 +5,6 @@
 #include <vector>
 
 namespace estimation::pnp {
-Eigen::Matrix<double, 2, 6> error_jacobian_wrt_perturbation(
-    const Eigen::Vector3d &point3d_cam2,
-    const geometry::PinholeCameraIntrinsics &intrinsics2);
 
 struct PnPSolver {
   virtual ~PnPSolver() = default;
