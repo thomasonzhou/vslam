@@ -9,7 +9,7 @@ namespace {
 constexpr int kPoseDim = 6;
 constexpr int kPixelDim = 2;
 constexpr int kErrorDim = 1; // intensity
-constexpr int kHalfPatch=2;
+constexpr int kHalfPatch=1;
 
 class DirectMethodTracker{
 public:
@@ -93,7 +93,7 @@ void DirectMethodTracker::track(const cv::Range& range){
     Eigen::Vector<double, kPoseDim> b_local = Eigen::Vector<double, kPoseDim>::Zero();
 
     for (size_t i = range.start; i < range.end; ++i){
-        if (!status_[i]) continue;
+        // if (!status_[i]) continue;
         
         const cv::Point2d &kp1 = p1_[i];
         for (int r = -kHalfPatch; r <= kHalfPatch; ++r){
@@ -106,7 +106,7 @@ void DirectMethodTracker::track(const cv::Range& range){
                 geometry::PointPixel data_cam2;
                 if(!cam2_from_cam1(p1, K1_inv, data_cam2, T_12_)){
                     status_[i] = false;
-                    break;
+                    continue;
                 }
                 
                 const double x2 = data_cam2.x;
@@ -136,8 +136,7 @@ void DirectMethodTracker::track(const cv::Range& range){
 
 void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candidate_T_12){
     const Eigen::Matrix3d K1_inv = intrinsics1_.K.inverse();
-    Eigen::Matrix<double, kPoseDim, kPoseDim> H_local = Eigen::Matrix<double, kPoseDim, kPoseDim>::Zero();
-    Eigen::Vector<double, kPoseDim> b_local = Eigen::Vector<double, kPoseDim>::Zero();
+    int count_good = 0;
     double cost_local = 0.0;
 
     for (size_t i = range.start; i < range.end; ++i){
@@ -153,6 +152,9 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
                     // status_[i] = false;
                     break;
                 }
+                else{
+                    count_good += 1;
+                }
                 const double x2 = data_cam2.x;
                 const double y2 = data_cam2.y;
                 // get pixel intensity using image
@@ -164,7 +166,7 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
             }
         }
     }
-    update(cost_local);
+    update(cost_local / count_good);
 }
 
 }  // namespace
@@ -201,7 +203,7 @@ void project_points(const cv::Mat &depth1,
 void direct_method_single_level(
     const cv::Mat &img1, 
     const cv::Mat &img2,
-    const cv::Mat &depth1,
+    const cv::Mat &depth_img1,
     const geometry::PinholeCameraIntrinsics &intrinsics1,
     const geometry::PinholeCameraIntrinsics &intrinsics2,
     const std::vector<cv::Point2d> &p1,
@@ -217,7 +219,7 @@ void direct_method_single_level(
 
     constexpr int kIters = 10;
     for (int iter = 0; iter < kIters; ++iter){
-        DirectMethodTracker tracker(img1, img2, depth1, intrinsics1, intrinsics2, p1, status, T_12);
+        DirectMethodTracker tracker(img1, img2, depth_img1, intrinsics1, intrinsics2, p1, status, T_12);
         cv::parallel_for_(cv::Range(0, static_cast<int>(p1.size())), [&](const cv::Range &range){
             tracker.track(range);
         });

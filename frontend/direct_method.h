@@ -20,7 +20,7 @@ void project_points(const cv::Mat &depth1,
 void direct_method_single_level(
     const cv::Mat &img1, 
     const cv::Mat &img2,
-    const cv::Mat &disparity_img1,
+    const cv::Mat &depth_img1,
     const geometry::PinholeCameraIntrinsics &intrinsics1,
     const geometry::PinholeCameraIntrinsics &intrinsics2,
     const std::vector<cv::Point2d> &p1,

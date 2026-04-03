@@ -10,7 +10,7 @@
 
 int main(int argc, char **argv) {
   const std::string file1 = "../images/left.png";
-  const std::string file2 = "../images/000001.png";
+  const std::string file2 = "../images/000005.png";
 
   const std::string disparity_file1 = "../images/disparity.png";
 
@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
   constexpr double kBaselineMetersKITTI = 0.573;
   const geometry::PinholeCameraIntrinsics kIntrinsicsKITTI(718.856, 718.856, 607.1928, 185.2157);
 
-  constexpr int kSamplesToTrack = 2000;
-  constexpr int kBorder = 2;
+  constexpr int kSamplesToTrack = 500;
+  constexpr int kBorder = 1;
   const std::vector<cv::Point2d> p1 = frontend::sample_pixels_uniform(img1, kSamplesToTrack, kBorder);
 
   std::vector<uchar> status;
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   std::cout << "pose: " << T_12.matrix3x4() << std::endl;
   std::vector<cv::Point2d> p2;
   frontend::project_points(depth1, p1, p2, status, kIntrinsicsKITTI, kIntrinsicsKITTI, img2.size(), T_12);
-  viz::viz_match(img1, img2, p1, p2, status);
+  viz::viz_match_overlay(img1, img2, p1, p2, status);
 
   return 0;
 }
