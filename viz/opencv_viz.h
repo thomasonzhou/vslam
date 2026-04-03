@@ -36,7 +36,7 @@ void viz_match(
       cv::line(full_img, pt1, pt2, kRed);
   }
   
-  cv::imshow("LK Optical Flow Match", full_img);
+  cv::imshow("Point Match", full_img);
   cv::waitKey(0);
 }
   

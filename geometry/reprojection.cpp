@@ -1,6 +1,41 @@
 #include "geometry/reprojection.h"
+#include "geometry/bilinear.h"
 
 namespace geometry {
+
+
+[[nodiscard]] bool cam2_from_cam1(const cv::Mat &depth1, const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, 
+    const geometry::PinholeCameraIntrinsics &intrinsics2,
+    const cv::Size &img2_size,
+    PointPixel &point2_data, const Sophus::SE3d &T_12){
+    const double depth_p1 = bilinear_interpolation(depth1, p1.x, p1.y);
+    if (depth_p1 <= 0){
+        return false;
+    }
+    const Eigen::Vector3d pixel1_homogenous = Eigen::Vector3d(p1.x, p1.y, 1.0);
+    const Eigen::Vector3d point1_3d = depth_p1 * K1_inv * pixel1_homogenous;
+    
+    // transform 3dpoint to cam2 frame, intrinsics to get pixel location, pixel intensity
+    const Eigen::Vector3d point2_3d = T_12 * point1_3d;
+    const Eigen::Vector3d pixel2_homogenous = intrinsics2.K * point2_3d / point2_3d[2];
+
+    // out of bounds is not enough grounds for disqualification
+    constexpr double kBorder = 5;
+    const double x2 = pixel2_homogenous[0];
+    if (x2 < kBorder || x2 > img2_size.width - kBorder - 1){
+        return false;
+    }
+    const double y2 = pixel2_homogenous[1];
+    if (y2 < kBorder || y2 > img2_size.height - kBorder - 1){
+        return false;
+    }
+
+    point2_data.point3d = point2_3d;
+    point2_data.x = x2;
+    point2_data.y = y2;
+    return true;
+}
+
 
 Eigen::Matrix<double, 2, 6> jacobian_pixel_error_wrt_perturbation(
     const Eigen::Vector3d &point3d_cam2,

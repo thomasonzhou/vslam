@@ -4,6 +4,22 @@
 
 namespace geometry {
 
+[[nodiscard]] inline cv::Mat depth_from_disparity(const cv::Mat &disparity_img,
+    const double baseline_m,
+    const geometry::PinholeCameraIntrinsics &intrinsics){
+    return intrinsics.fx() * baseline_m / disparity_img;
+}
+
+struct PointPixel{
+    Eigen::Vector3d point3d;
+    double x;
+    double y;
+};
+
+[[nodiscard]] bool cam2_from_cam1(const cv::Mat &depth1, const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, 
+    const geometry::PinholeCameraIntrinsics &intrinsics2,
+    const cv::Size &img2_size,
+    PointPixel &point2_data, const Sophus::SE3d &T_12);
 
 [[nodiscard]] Eigen::Matrix<double, 2, 6> jacobian_pixel_error_wrt_perturbation(
     const Eigen::Vector3d &point3d_cam2,

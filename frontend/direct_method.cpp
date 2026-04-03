@@ -65,41 +65,9 @@ private:
         cost_ += cost;
     }
 
-    struct DirectData{
-        Eigen::Vector3d point3d;
-        double x;
-        double y;
+    bool cam2_from_cam1(const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, geometry::PointPixel &point2_data, const Sophus::SE3d &T_12){
+        return geometry::cam2_from_cam1(depth1_, p1, K1_inv, intrinsics2_, img2_.size(), point2_data, T_12);
     };
-
-    bool cam2_from_cam1(const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, DirectData &point2_data, const Sophus::SE3d &T_12){
-        const double depth_p1 = geometry::bilinear_interpolation(depth1_, p1.x, p1.y);
-        if (depth_p1 <= 0){
-            return false;
-        }
-        const Eigen::Vector3d pixel1_homogenous = Eigen::Vector3d(p1.x, p1.y, 1.0);
-        const Eigen::Vector3d point1_3d = depth_p1 * K1_inv * pixel1_homogenous;
-        
-        // transform 3dpoint to cam2 frame, intrinsics to get pixel location, pixel intensity
-        const Eigen::Vector3d point2_3d = T_12 * point1_3d;
-        const Eigen::Vector3d pixel2_homogenous = intrinsics2_.K * point2_3d / point2_3d[2];
-
-        // out of bounds is not enough grounds for disqualification
-        constexpr double kBorder = 5;
-        const double x2 = pixel2_homogenous[0];
-        if (x2 < kBorder || x2 > img2_.cols - kBorder - 1){
-            return false;
-        }
-        const double y2 = pixel2_homogenous[1];
-        if (y2 < kBorder || y2 > img2_.rows - kBorder - 1){
-            return false;
-        }
-
-        point2_data.point3d = point2_3d;
-        point2_data.x = x2;
-        point2_data.y = y2;
-        return true;
-    }
-
 
     const cv::Mat &img1_; 
     const cv::Mat &img2_;
@@ -135,7 +103,7 @@ void DirectMethodTracker::track(const cv::Range& range){
                 // get 3d point in camera1 frame
                 const cv::Point2d p1 = kp1 + cv::Point2d(c, r);
 
-                DirectData data_cam2;
+                geometry::PointPixel data_cam2;
                 if(!cam2_from_cam1(p1, K1_inv, data_cam2, T_12_)){
                     status_[i] = false;
                     break;
@@ -180,7 +148,7 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
             if(!status_[i]) break;
             for (int c = -kHalfPatch; c <= kHalfPatch; ++c){
                 const cv::Point2d p1 = kp1 + cv::Point2d(c, r);
-                DirectData data_cam2;
+                geometry::PointPixel data_cam2;
                 if(!cam2_from_cam1(p1, K1_inv, data_cam2, candidate_T_12)){
                     // status_[i] = false;
                     break;
@@ -202,11 +170,38 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
 }  // namespace
 
 namespace frontend {
+
+void project_points(const cv::Mat &depth1, 
+    const std::vector<cv::Point2d> &p1, 
+    std::vector<cv::Point2d> &p2, 
+    std::vector<uchar> &status,
+    const geometry::PinholeCameraIntrinsics &intrinsics1,
+    const geometry::PinholeCameraIntrinsics &intrinsics2,
+    const cv::Size &img2_size,
+    const Sophus::SE3d &T_12){
+        const Eigen::Matrix3d K1_inv = intrinsics1.K.inverse();
+        if (p2.size() != p1.size()){
+            p2.resize(p1.size());
+        }
+        status.resize(p1.size(), true);
+
+        for (size_t i = 0; i < p1.size(); ++i){
+            geometry::PointPixel data_cam2;
+            if(geometry::cam2_from_cam1(depth1, p1[i], K1_inv, intrinsics2, img2_size, data_cam2, T_12)){
+                p2[i] = cv::Point2d(data_cam2.x, data_cam2.y);
+            }
+            else{
+                status[i] = false;
+            }
+        }
+    }
+
+
+
 void direct_method_single_level(
     const cv::Mat &img1, 
     const cv::Mat &img2,
-    const cv::Mat &disparity_img1,
-    const double baseline_m,
+    const cv::Mat &depth1,
     const geometry::PinholeCameraIntrinsics &intrinsics1,
     const geometry::PinholeCameraIntrinsics &intrinsics2,
     const std::vector<cv::Point2d> &p1,
@@ -216,8 +211,6 @@ void direct_method_single_level(
     if (status.size() != p1.size()){
         status.resize(p1.size(), true);
     }
-
-    const cv::Mat depth1 = intrinsics1.fx() * baseline_m / disparity_img1;
 
     double last_cost = std::numeric_limits<double>::max();
     constexpr double kConverged = 0.001;

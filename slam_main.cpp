@@ -5,6 +5,8 @@
 #include <opencv2/imgproc.hpp>
 #include "frontend/point_sampling.h"
 #include "frontend/direct_method.h"
+#include "geometry/reprojection.h"
+#include "viz/opencv_viz.h"
 
 int main(int argc, char **argv) {
   const std::string file1 = "../images/left.png";
@@ -20,7 +22,7 @@ int main(int argc, char **argv) {
   constexpr double kBaselineMetersKITTI = 0.573;
   const geometry::PinholeCameraIntrinsics kIntrinsicsKITTI(718.856, 718.856, 607.1928, 185.2157);
 
-  constexpr int kSamplesToTrack = 1000;
+  constexpr int kSamplesToTrack = 2000;
   constexpr int kBorder = 2;
   const std::vector<cv::Point2d> p1 = frontend::sample_pixels_uniform(img1, kSamplesToTrack, kBorder);
 
@@ -28,8 +30,12 @@ int main(int argc, char **argv) {
 
   Sophus::SE3d T_12;
 
-  frontend::direct_method_single_level(img1, img2, disparity_img1, kBaselineMetersKITTI, kIntrinsicsKITTI, kIntrinsicsKITTI, p1, status, T_12);
+  const cv::Mat depth1 = geometry::depth_from_disparity(disparity_img1, kBaselineMetersKITTI, kIntrinsicsKITTI);
+  frontend::direct_method_single_level(img1, img2, depth1, kIntrinsicsKITTI, kIntrinsicsKITTI, p1, status, T_12);
   std::cout << "pose: " << T_12.matrix3x4() << std::endl;
+  std::vector<cv::Point2d> p2;
+  frontend::project_points(depth1, p1, p2, status, kIntrinsicsKITTI, kIntrinsicsKITTI, img2.size(), T_12);
+  viz::viz_match(img1, img2, p1, p2, status);
 
   return 0;
 }
