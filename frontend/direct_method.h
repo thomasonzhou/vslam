@@ -28,4 +28,16 @@ void direct_method_single_level(
     Sophus::SE3d &T_12
 );
 
+
+void direct_method_pyramid(
+    const cv::Mat &img1, 
+    const cv::Mat &img2,
+    const cv::Mat &depth_img1,
+    const geometry::PinholeCameraIntrinsics &intrinsics1,
+    const geometry::PinholeCameraIntrinsics &intrinsics2,
+    const std::vector<cv::Point2d> &p1,
+    std::vector<uchar> &status,
+    Sophus::SE3d &T_12
+);
+
 }  // namespace frontend

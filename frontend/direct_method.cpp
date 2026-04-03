@@ -65,8 +65,8 @@ private:
         cost_ += cost;
     }
 
-    bool cam2_from_cam1(const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, geometry::PointPixel &point2_data, const Sophus::SE3d &T_12){
-        return geometry::cam2_from_cam1(depth1_, p1, K1_inv, intrinsics2_, img2_.size(), point2_data, T_12);
+    bool cam2_from_cam1(const double depth_p1, const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, geometry::PointPixel &point2_data, const Sophus::SE3d &T_12){
+        return geometry::cam2_from_cam1(depth_p1, p1, K1_inv, intrinsics2_, img2_.size(), point2_data, T_12);
     };
 
     const cv::Mat &img1_; 
@@ -96,6 +96,7 @@ void DirectMethodTracker::track(const cv::Range& range){
         // if (!status_[i]) continue;
         
         const cv::Point2d &kp1 = p1_[i];
+        const double depth_p1 = geometry::bilinear_interpolation(depth1_, kp1.x, kp1.y);
         for (int r = -kHalfPatch; r <= kHalfPatch; ++r){
             if(!status_[i]) break;
             for (int c = -kHalfPatch; c <= kHalfPatch; ++c){
@@ -104,7 +105,7 @@ void DirectMethodTracker::track(const cv::Range& range){
                 const cv::Point2d p1 = kp1 + cv::Point2d(c, r);
 
                 geometry::PointPixel data_cam2;
-                if(!cam2_from_cam1(p1, K1_inv, data_cam2, T_12_)){
+                if(!cam2_from_cam1(depth_p1, p1, K1_inv, data_cam2, T_12_)){
                     status_[i] = false;
                     continue;
                 }
@@ -143,12 +144,13 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
         if (!status_[i]) continue;
         
         const cv::Point2d &kp1 = p1_[i];
+        const double depth_p1 = geometry::bilinear_interpolation(depth1_, kp1.x, kp1.y);
         for (int r = -kHalfPatch; r <= kHalfPatch; ++r){
             if(!status_[i]) break;
             for (int c = -kHalfPatch; c <= kHalfPatch; ++c){
                 const cv::Point2d p1 = kp1 + cv::Point2d(c, r);
                 geometry::PointPixel data_cam2;
-                if(!cam2_from_cam1(p1, K1_inv, data_cam2, candidate_T_12)){
+                if(!cam2_from_cam1(depth_p1, p1, K1_inv, data_cam2, candidate_T_12)){
                     // status_[i] = false;
                     break;
                 }
@@ -188,8 +190,9 @@ void project_points(const cv::Mat &depth1,
         status.resize(p1.size(), true);
 
         for (size_t i = 0; i < p1.size(); ++i){
+            const double depth_p1 = geometry::bilinear_interpolation(depth1, p1[i].x, p1[i].y);
             geometry::PointPixel data_cam2;
-            if(geometry::cam2_from_cam1(depth1, p1[i], K1_inv, intrinsics2, img2_size, data_cam2, T_12)){
+            if(geometry::cam2_from_cam1(depth_p1, p1[i], K1_inv, intrinsics2, img2_size, data_cam2, T_12)){
                 p2[i] = cv::Point2d(data_cam2.x, data_cam2.y);
             }
             else{
@@ -242,6 +245,19 @@ void direct_method_single_level(
         T_12 = candidate_T_12;
 
     }
+}
+
+void direct_method_pyramid(
+    const cv::Mat &img1, 
+    const cv::Mat &img2,
+    const cv::Mat &depth_img1,
+    const geometry::PinholeCameraIntrinsics &intrinsics1,
+    const geometry::PinholeCameraIntrinsics &intrinsics2,
+    const std::vector<cv::Point2d> &p1,
+    std::vector<uchar> &status,
+    Sophus::SE3d &T_12
+){
+    
 }
 
 }  // namespace frontend

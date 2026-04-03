@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   constexpr double kBaselineMetersKITTI = 0.573;
   const geometry::PinholeCameraIntrinsics kIntrinsicsKITTI(718.856, 718.856, 607.1928, 185.2157);
 
-  constexpr int kSamplesToTrack = 500;
+  constexpr int kSamplesToTrack = 2000;
   constexpr int kBorder = 1;
   const std::vector<cv::Point2d> p1 = frontend::sample_pixels_uniform(img1, kSamplesToTrack, kBorder);
 

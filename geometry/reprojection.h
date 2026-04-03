@@ -16,7 +16,7 @@ struct PointPixel{
     double y;
 };
 
-[[nodiscard]] bool cam2_from_cam1(const cv::Mat &depth1, const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, 
+[[nodiscard]] bool cam2_from_cam1(const double depth_p1, const cv::Point2d &p1, const Eigen::Matrix3d &K1_inv, 
     const geometry::PinholeCameraIntrinsics &intrinsics2,
     const cv::Size &img2_size,
     PointPixel &point2_data, const Sophus::SE3d &T_12);
