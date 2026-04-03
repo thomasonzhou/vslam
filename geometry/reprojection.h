@@ -4,11 +4,16 @@
 
 namespace geometry {
 
-Eigen::Vector2d reprojection_error(const Eigen::Vector3d &point3d_cam2,
+
+[[nodiscard]] Eigen::Matrix<double, 2, 6> jacobian_pixel_error_wrt_perturbation(
+    const Eigen::Vector3d &point3d_cam2,
+    const geometry::PinholeCameraIntrinsics &intrinsics2);
+
+[[nodiscard]] Eigen::Vector2d reprojection_error(const Eigen::Vector3d &point3d_cam2,
                    const Eigen::Vector2d &point2d_img2,
                    const geometry::PinholeCameraIntrinsics &intrinsics2);
 
-double sum_of_squares_cost(
+[[nodiscard]] double sum_of_squares_cost(
     const std::vector<Eigen::Vector3d,
                       Eigen::aligned_allocator<Eigen::Vector3d>> &points3d_cam1,
     const std::vector<Eigen::Vector2d,
@@ -17,7 +22,6 @@ double sum_of_squares_cost(
     const Sophus::SE3d &c2_T_c1);
 
 
-Eigen::Vector2d
-camera_to_pixel(const Eigen::Vector3d &point3d,
+[[nodiscard]] Eigen::Vector2d camera_to_pixel(const Eigen::Vector3d &point3d,
                 const geometry::PinholeCameraIntrinsics &intrinsics);
 }; // namespace geometry

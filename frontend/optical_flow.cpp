@@ -16,9 +16,8 @@ OpticalFlowTracker(
     const cv::Mat &img2,
     const std::vector<cv::Point2d> &p1,
     std::vector<cv::Point2d> &p2,
-    std::vector<bool> &status,
-    std::vector<double> &error
-) : img1_(img1), img2_(img2), p1_(p1), p2_(p2), status_(status), error_(error) {}
+    std::vector<uchar> &status
+) : img1_(img1), img2_(img2), p1_(p1), p2_(p2), status_(status) {}
 
 void trackFeatures(const cv::Range &range);
 
@@ -28,8 +27,7 @@ const cv::Mat &img1_;
 const cv::Mat &img2_;
 const std::vector<cv::Point2d> &p1_;
 std::vector<cv::Point2d> &p2_;
-std::vector<bool> &status_;
-std::vector<double> &error_;
+std::vector<uchar> &status_;
 
 };
 
@@ -38,18 +36,18 @@ void OpticalFlowTracker::trackFeatures(const cv::Range &range){
     // for each pixel, find a patch around the area
     // TODO: implement inverse mode
     for (size_t i = range.start; i < range.end; ++i){
+        if (!status_[i]) continue;
         const cv::Point2d kp1 = p1_[i];
+        const cv::Point2d kp2_init = p2_[i];
 
-        double dx = 0.0;
-        double dy = 0.0;
+        double dx = kp2_init.x - kp1.x;
+        double dy = kp2_init.y - kp1.y;
 
         double cost = 0.0;
         double prev_cost = 0.0;
 
         Eigen::Matrix2d H = Eigen::Matrix2d::Zero();
         Eigen::Vector2d b = Eigen::Vector2d::Zero();
-
-        status_[i] = true; 
 
         for (int iter = 0; iter < kMaxIter; ++iter){
 
@@ -105,7 +103,6 @@ void OpticalFlowTracker::trackFeatures(const cv::Range &range){
 
             prev_cost = cost;
         }
-        error_[i] = cost;
         p2_[i] = kp1 + cv::Point2d(dx, dy);
     }
 }
@@ -115,14 +112,17 @@ void optical_flow_one_level(
     const cv::Mat &img2,
     const std::vector<cv::Point2d> &p1,
     std::vector<cv::Point2d> &p2,
-    std::vector<bool> &status,
-    std::vector<double> &error
+    std::vector<uchar> &status
 ){
-    p2.resize(p1.size());
-    status.resize(p1.size());
-    error.resize(p1.size());
+    const bool has_initial_guess = (p1.size() == p2.size());
+    if (!has_initial_guess){
+        p2 = p1;
+    }
+    if (status.size() != p1.size()){
+        status.resize(p1.size(), true);
+    }
 
-    OpticalFlowTracker tracker(img1, img2, p1, p2, status, error);
+    OpticalFlowTracker tracker(img1, img2, p1, p2, status);
     cv::parallel_for_(cv::Range(0, static_cast<int>(p1.size())), [&](const cv::Range &range){
         tracker.trackFeatures(range);
     });
@@ -134,8 +134,7 @@ void optical_flow_pyramid(
     const cv::Mat &img2,
     const std::vector<cv::Point2d> &p1,
     std::vector<cv::Point2d> &p2,
-    std::vector<bool> &status,
-    std::vector<double> &error
+    std::vector<uchar> &status
 ){
     constexpr int kPyramids = 4;
     constexpr double kPyramidScale = 0.5;
@@ -174,8 +173,12 @@ void optical_flow_pyramid(
         pyr_p2.emplace_back(kScales.back() * kp);
     }
 
+    if (status.size() != p1.size()){
+        status.resize(p1.size(), true);
+    }
+
     for(int level = kScales.size() - 1; level >= 0; --level){
-        optical_flow_one_level(pyr1[level], pyr2[level], pyr_p1, pyr_p2, status, error);
+        optical_flow_one_level(pyr1[level], pyr2[level], pyr_p1, pyr_p2, status);
 
         if (level > 0){
             for(size_t i = 0; i < pyr_p1.size(); ++i){

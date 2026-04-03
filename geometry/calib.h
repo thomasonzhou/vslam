@@ -23,7 +23,7 @@ struct PinholeCameraIntrinsics {
   }
 };
 
-cv::Point2d pixel_to_camera(const cv::Point2d &pixel,
+inline cv::Point2d pixel_to_camera(const cv::Point2d &pixel,
                             const PinholeCameraIntrinsics &intrinsics) {
   return cv::Point2d((pixel.x - intrinsics.cx()) / intrinsics.fx(),
                      (pixel.y - intrinsics.cy()) / intrinsics.fy());

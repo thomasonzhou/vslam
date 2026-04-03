@@ -43,7 +43,7 @@ target_link_libraries(geometry PUBLIC Eigen3::Eigen)
 
 target_link_libraries(estimation PUBLIC Eigen3::Eigen geometry PRIVATE g2o::core)
 
-add_library(frontend frontend/orb.cpp frontend/optical_flow.cpp)
+add_library(frontend frontend/orb.cpp frontend/optical_flow.cpp frontend/direct_method.cpp)
 target_link_libraries(frontend ${OpenCV_LIBS} estimation)
 
 target_link_libraries(estimation

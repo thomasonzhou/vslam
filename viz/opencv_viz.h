@@ -1,3 +1,4 @@
+#pragma once
 #include <opencv2/highgui.hpp>
 
 namespace viz {
@@ -7,7 +8,7 @@ void viz_match(
     const cv::Mat &img2, 
     const std::vector<cv::Point2d> &p1,
     const std::vector<cv::Point2d> &p2,
-    const std::vector<bool> &match_status
+    const std::vector<uchar> &match_status
 ){
 
   cv::Mat full_img_gray;
