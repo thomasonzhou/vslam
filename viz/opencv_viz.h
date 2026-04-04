@@ -56,7 +56,7 @@ void viz_match_overlay(
   }
   
   constexpr int kRadius = 3;
-  constexpr int kThickness = 3;
+  constexpr int kThickness = 1;
   const cv::Scalar kGreen(0, 255, 0);
   const cv::Scalar kRed(0, 0, 255);
   for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){

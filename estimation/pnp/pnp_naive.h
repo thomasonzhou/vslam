@@ -48,7 +48,7 @@ struct NaivePnPSolver : public PnPSolver {
         Eigen::Matrix<double, 2, 6> J =
             geometry::jacobian_pixel_error_wrt_perturbation(point3d_cam2, intrinsics2);
 
-        H_gn += J.transpose() * J;
+        H_gn += -J.transpose() * J;
         b_gn += J.transpose() * error;
       }
 
