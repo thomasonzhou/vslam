@@ -3,7 +3,6 @@
 #include "geometry/reprojection.h"
 #include <mutex>
 #include <opencv2/imgproc.hpp>
-#include <iostream>
 
 namespace {
 
@@ -100,14 +99,13 @@ void DirectMethodTracker::track(const cv::Range& range){
 
         geometry::PointPixel center_cam2;
         if(!cam2_from_cam1(i, kp1, K1_inv, center_cam2, T_12_)){
-            // status_[i] = false;
+            status_[i] = false;
             continue;
         }
 
         const Eigen::Matrix<double, kPixelDim, kPoseDim> J_pixel_perturb = geometry::jacobian_pixel_error_wrt_perturbation(center_cam2.point3d, intrinsics2_);
                 
         for (int r = -kHalfPatch; r <= kHalfPatch; ++r){
-            // if(!status_[i]) break;
             for (int c = -kHalfPatch; c <= kHalfPatch; ++c){
                 const cv::Point2d p1 = kp1 + cv::Point2d(c, r);
                 const double x2 = center_cam2.x + c;
@@ -144,11 +142,9 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
 
         geometry::PointPixel center_cam2;
         if(!cam2_from_cam1(i, kp1, K1_inv, center_cam2, candidate_T_12)){
-            // status_[i] = false;
             continue;
         }
         for (int r = -kHalfPatch; r <= kHalfPatch; ++r){
-            // if(!status_[i]) break;
             for (int c = -kHalfPatch; c <= kHalfPatch; ++c){
                 const cv::Point2d p1 = kp1 + cv::Point2d(c, r);
                 const double x2 = center_cam2.x + c;
@@ -213,8 +209,14 @@ void direct_method_single_level(
         status.resize(p1.size(), true);
     }
 
-    double last_cost = std::numeric_limits<double>::max();
-    constexpr double kConverged = 0.001;
+    double last_cost = [&](){
+        DirectMethodTracker tracker(img1, img2, depths1, intrinsics1, intrinsics2, p1, status, T_12);
+        cv::parallel_for_(cv::Range(0, static_cast<int>(p1.size())), [&](const cv::Range &range){
+            tracker.track(range);
+        });
+        return tracker.cost();
+    }();
+    constexpr double kConverged = 0.00001;
 
     constexpr int kIters = 10;
     for (int iter = 0; iter < kIters; ++iter){
@@ -233,7 +235,6 @@ void direct_method_single_level(
             tracker.eval(range, candidate_T_12);
         });
         const double candidate_cost = tracker.cost();
-        std::cout << "iter: " << iter << ", cost: " << candidate_cost << std::endl;
         tracker.reset_cost();
         if (iter > 0 && candidate_cost > last_cost){
             break;
@@ -295,11 +296,8 @@ void direct_method_pyramid(
 
     geometry::PinholeCameraIntrinsics pyr_intrinsics1 = intrinsics1;
     geometry::PinholeCameraIntrinsics pyr_intrinsics2 = intrinsics2;
-    pyr_intrinsics1.K *= kScales.back();
-    pyr_intrinsics1.K(2, 2) = 1.0;
-    pyr_intrinsics2.K *= kScales.back();
-    pyr_intrinsics2.K(2, 2) = 1.0;
-
+    pyr_intrinsics1.scale(kScales.back());
+    pyr_intrinsics2.scale(kScales.back());
 
     for(int level = kScales.size() - 1; level >= 0; --level){
         direct_method_single_level(pyr1[level], pyr2[level], depths1, pyr_intrinsics1, pyr_intrinsics2, pyr_p1, status, T_12);
@@ -309,10 +307,8 @@ void direct_method_pyramid(
             for(size_t i = 0; i < pyr_p1.size(); ++i){
                 pyr_p1[i] /= kPyramidScale;
             }
-            pyr_intrinsics1.K /= kPyramidScale;
-            pyr_intrinsics1.K(2, 2) = 1.0;
-            pyr_intrinsics2.K /= kPyramidScale;
-            pyr_intrinsics2.K(2, 2) = 1.0;
+            pyr_intrinsics1.scale(1.0/kPyramidScale);
+            pyr_intrinsics2.scale(1.0/kPyramidScale);
         }
     }
 }

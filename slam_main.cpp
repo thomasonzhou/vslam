@@ -11,7 +11,7 @@
 
 int main(int argc, char **argv) {
   const std::string file1 = "../images/left.png";
-  const std::string file2 = "../images/000001.png";
+  const std::string file2 = "../images/000005.png";
 
   const std::string disparity_file1 = "../images/disparity.png";
 
