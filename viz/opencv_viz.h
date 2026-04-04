@@ -3,6 +3,8 @@
 
 namespace viz {
 
+constexpr int kRadius = 3;
+constexpr int kThickness = 1;
 const cv::Scalar kGreen(0, 255, 0);
 const cv::Scalar kRed(0, 0, 255);
 
@@ -25,7 +27,6 @@ void viz_match(
     full_img = full_img_gray;
   }
   
-  const int kRadius = 3;
   for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){
       if(!match_status[i]) continue;
       
@@ -34,7 +35,7 @@ void viz_match(
       
       cv::circle(full_img, pt1, kRadius, kGreen);
       cv::circle(full_img, pt2, kRadius, kGreen);
-      cv::line(full_img, pt1, pt2, kRed);
+      cv::line(full_img, pt1, pt2, kRed, kThickness);
   }
   
   cv::imshow("Point Match", full_img);
@@ -54,8 +55,7 @@ void viz_match_overlay(
     cv::cvtColor(img, full_img, cv::COLOR_GRAY2BGR);
   }
   
-  constexpr int kRadius = 3;
-  constexpr int kThickness = 1;
+
   for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){
       if(!match_status[i]) continue;
       

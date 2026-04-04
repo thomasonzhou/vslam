@@ -5,7 +5,6 @@
 #include <opencv2/imgproc.hpp>
 #include "frontend/point_sampling.h"
 #include "frontend/direct_method.h"
-#include "geometry/reprojection.h"
 #include "geometry/bilinear.h"
 #include "viz/opencv_viz.h"
 
@@ -38,6 +37,7 @@ int main(int argc, char **argv) {
   Sophus::SE3d T_12 = Sophus::SE3d();
   
   cv::Mat img2;
+  std::vector<cv::Point2d> p2_of;
   for(int img = 1; img <= kMatchingImgs; ++img){
     const std::string file2 = "../images/00000" + std::to_string(img) + ".png";
     img2 = cv::imread(file2, cv::IMREAD_GRAYSCALE);
