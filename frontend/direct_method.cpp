@@ -113,7 +113,7 @@ void DirectMethodTracker::track(const cv::Range& range){
                 // get pixel intensity using image
                 const double intensity1 = geometry::bilinear_interpolation(img1_, p1.x, p1.y);
                 const double intensity2 = geometry::bilinear_interpolation(img2_, x2, y2);
-                const double photometric_error = intensity1 - intensity2;
+                const double photometric_error = intensity2 - intensity1;
 
                 const Eigen::Vector<double, kPixelDim> J_intensity_pixel(
                     0.5 * (geometry::bilinear_interpolation(img2_, x2 + 1, y2) - 
@@ -122,7 +122,7 @@ void DirectMethodTracker::track(const cv::Range& range){
                     geometry::bilinear_interpolation(img2_, x2, y2 - 1))
                 );
 
-                const Eigen::Matrix<double, kErrorDim, kPoseDim> J = -J_intensity_pixel.transpose() * J_pixel_perturb;
+                const Eigen::Matrix<double, kErrorDim, kPoseDim> J = J_intensity_pixel.transpose() * J_pixel_perturb;
                 H_local += J.transpose() * J;
                 b_local += -J.transpose() * photometric_error;
             }
@@ -153,7 +153,7 @@ void DirectMethodTracker::eval(const cv::Range& range, const Sophus::SE3d &candi
                 // get pixel intensity using image
                 const double intensity1 = geometry::bilinear_interpolation(img1_, p1.x, p1.y);
                 const double intensity2 = geometry::bilinear_interpolation(img2_, x2, y2);
-                const double photometric_error = intensity1 - intensity2;
+                const double photometric_error = intensity2 - intensity1;
 
                 cost_local += 0.5 * photometric_error * photometric_error;
             }
