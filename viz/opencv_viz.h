@@ -3,6 +3,9 @@
 
 namespace viz {
 
+const cv::Scalar kGreen(0, 255, 0);
+const cv::Scalar kRed(0, 0, 255);
+
 void viz_match(
     const cv::Mat &img1, 
     const cv::Mat &img2, 
@@ -23,8 +26,6 @@ void viz_match(
   }
   
   const int kRadius = 3;
-  const cv::Scalar kGreen(0, 255, 0);
-  const cv::Scalar kRed(0, 0, 255);
   for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){
       if(!match_status[i]) continue;
       
@@ -42,23 +43,19 @@ void viz_match(
 
 
 void viz_match_overlay(
-    const cv::Mat &img1, 
-    const cv::Mat &img2, 
+    const cv::Mat &img,
     const std::vector<cv::Point2d> &p1,
     const std::vector<cv::Point2d> &p2,
     const std::vector<uchar> &match_status
 ){
 
-
-  cv::Mat full_img = img2;;
+  cv::Mat full_img = img;
   if (full_img.channels() == 1){
-    cv::cvtColor(img2, full_img, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(img, full_img, cv::COLOR_GRAY2BGR);
   }
   
   constexpr int kRadius = 3;
   constexpr int kThickness = 1;
-  const cv::Scalar kGreen(0, 255, 0);
-  const cv::Scalar kRed(0, 0, 255);
   for (size_t i = 0; i < std::min(p1.size(), p2.size()); ++i){
       if(!match_status[i]) continue;
       
@@ -66,8 +63,8 @@ void viz_match_overlay(
       const cv::Point2d pt2 = p2[i];
       
       // cv::circle(full_img, pt1, kRadius, kGreen);
-      // cv::circle(full_img, pt2, kRadius, kGreen);
-      cv::line(full_img, pt1, pt2, kRed, kThickness);
+      cv::circle(full_img, pt2, kRadius, kGreen);
+      cv::line(full_img, pt1, pt2, kGreen, kThickness);
   }
   
   cv::imshow("Point Match", full_img);

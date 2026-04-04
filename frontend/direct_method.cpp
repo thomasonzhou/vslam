@@ -93,7 +93,7 @@ void DirectMethodTracker::track(const cv::Range& range){
     Eigen::Vector<double, kPoseDim> b_local = Eigen::Vector<double, kPoseDim>::Zero();
 
     for (size_t i = range.start; i < range.end; ++i){
-        // if (!status_[i]) continue;
+        if (!status_[i]) continue;
         
         const cv::Point2d &kp1 = p1_[i];
 
