@@ -7,7 +7,7 @@
 // helpers to parse bundle adjustment in the large files
 // https://grail.cs.washington.edu/projects/bal/
 
-namespace {
+namespace util::bal{
     constexpr int kPixelDim = 2;
     constexpr int kRotationVecDim = 3;
     // constexpr int kQuaternionDim = kRotationVecDim + 1;
@@ -17,9 +17,9 @@ namespace {
     constexpr int kPoseDim = kTranslationDim + kRotationDim;
     constexpr int kBALCameraBlockSize = kRotationDim + kTranslationDim + kIntrinsicsDim;
 
-    constexpr int kFocalIdx = 0;
-    constexpr int kK1Idx = 1;
-    constexpr int kK2Idx = 2;
+    constexpr int kFocalIdx = kPoseDim + 0;
+    constexpr int kK1Idx = kPoseDim + 1;
+    constexpr int kK2Idx = kPoseDim + 2;
 }  // namespace
 
 namespace util {
@@ -32,9 +32,9 @@ explicit BALProblem(const std::filesystem::path &path){
     
     camera_idx.resize(num_observations);
     point_idx.resize(num_observations);
-    observations.resize(num_observations * kPixelDim);
-    camera_params.resize(num_cameras * kBALCameraBlockSize);
-    point_positions.resize(num_points * kTranslationDim);
+    observations.resize(num_observations * bal::kPixelDim);
+    camera_params.resize(num_cameras * bal::kBALCameraBlockSize);
+    point_positions.resize(num_points * bal::kTranslationDim);
 
     for(int i = 0; i < num_observations; ++i){
         in >> camera_idx[i] >> point_idx[i] >> observations[i * 2] >> observations[i * 2 + 1];
@@ -42,7 +42,7 @@ explicit BALProblem(const std::filesystem::path &path){
 
     for(int cam = 0; cam < num_cameras; ++cam){
         const std::size_t cam_start = cam_block_idx(cam);
-        for (int i = 0; i < kRotationDim; ++i){
+        for (int i = 0; i < bal::kRotationDim; ++i){
             in >> camera_params[cam_start + i];
         }
         // quaternion logic, requires manifolds so we will approach this later
@@ -57,20 +57,24 @@ explicit BALProblem(const std::filesystem::path &path){
         // }
 
         
-        for (int i = 0; i < kTranslationDim; ++i){
-            in >> camera_params[cam_start + kRotationDim + i];
+        for (int i = 0; i < bal::kTranslationDim; ++i){
+            in >> camera_params[cam_start + bal::kRotationDim + i];
         }
-        for (int i = 0; i < kIntrinsicsDim; ++i){
-            in >> camera_params[cam_start + kRotationDim + kTranslationDim + i];
+        for (int i = 0; i < bal::kIntrinsicsDim; ++i){
+            in >> camera_params[cam_start + bal::kRotationDim + bal::kTranslationDim + i];
         }
     }
     for(int point = 0; point < num_points; ++point){
         const std::size_t point_start = point_block_idx(point);
-        for (int i = 0; i < kTranslationDim; ++i){
+        for (int i = 0; i < bal::kTranslationDim; ++i){
             in >> point_positions[point_start + i];
         }
     }
     
+}
+
+const double* observation_data(std::size_t idx) const noexcept{
+    return observations.data() + idx * bal::kPixelDim;
 }
 
 double* mutable_camera_data(std::size_t cam) noexcept{
@@ -93,22 +97,21 @@ std::size_t num_observations;
 std::size_t num_cameras;
 std::size_t num_points;
 
+std::vector<int> camera_idx;
+std::vector<int> point_idx;
+
 private:
 size_t cam_block_idx(const size_t cam) const noexcept {
-    return kBALCameraBlockSize * cam;
+    return bal::kBALCameraBlockSize * cam;
 }
 
 size_t point_block_idx(const size_t point) const noexcept {
-    return kTranslationDim * point;
+    return bal::kTranslationDim * point;
 }
-
-std::vector<int> camera_idx;
-std::vector<int> point_idx;
 
 std::vector<double> observations;
 std::vector<double> camera_params;
 std::vector<double> point_positions;
-
 
 };
 

@@ -41,7 +41,7 @@ add_library(estimation
 add_library(geometry SHARED geometry/reprojection.cpp)
 target_link_libraries(geometry PUBLIC Eigen3::Eigen)
 
-target_link_libraries(estimation PUBLIC Eigen3::Eigen geometry PRIVATE g2o::core)
+target_link_libraries(estimation PUBLIC Eigen3::Eigen geometry PRIVATE g2o::core Ceres::ceres)
 
 add_library(frontend frontend/orb.cpp frontend/optical_flow.cpp frontend/direct_method.cpp)
 target_link_libraries(frontend ${OpenCV_LIBS} estimation)
