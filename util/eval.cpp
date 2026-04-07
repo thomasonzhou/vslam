@@ -34,6 +34,6 @@ namespace util
     // const double rmse = std::sqrt(mse);
     // std::cout << "RMSE: " << rmse << std::endl;
 
-    pangolin_draw({est_view, gt_view});
+    viz::pangolin_draw({est_view, gt_view});
   }
 } // namespace util

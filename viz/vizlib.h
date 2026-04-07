@@ -7,13 +7,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
-using Eigen::aligned_allocator;
-using Eigen::Isometry3d;
-using Eigen::Quaterniond;
-using Eigen::Vector3d;
 
-typedef std::vector<Sophus::SE3d, aligned_allocator<Sophus::SE3d>> poseVector;
+typedef std::vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>> poseVector;
 
 struct pangolin_config {
   bool draw_pose_axes_ = false;
@@ -45,10 +42,18 @@ const std::unordered_map<std::string, std::tuple<float, float, float>>
                  {"blue", {0.0f, 0.0f, 1.0f}}};
 };
 
-constexpr float view_w = 1920.0f;
-constexpr float view_h = 1080.0f;
+constexpr float kViewWidth = 1920.0f;
+constexpr float kViewHeight = 1080.0f;
+namespace viz {
 
-void pangolin_draw(const std::vector<trajectory_view> &traj_view);
-void pangolin_draw(const trajectory_view &traj_view) {
-  pangolin_draw({traj_view});
-}
+  void draw_point(const Eigen::Vector3d &point);
+  
+  void pangolin_run(const std::function<void()> &draw_fn);
+
+  void pangolin_draw(const std::vector<trajectory_view> &traj_view);
+  inline void pangolin_draw(const trajectory_view &traj_view) {
+    pangolin_draw({traj_view});
+  }
+
+
+}  // namespace viz

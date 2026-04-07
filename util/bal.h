@@ -89,6 +89,10 @@ const double* points(std::size_t point) const noexcept{
     return point_positions.data() + point_block_idx(point);
 }
 
+std::size_t num_observations;
+std::size_t num_cameras;
+std::size_t num_points;
+
 private:
 size_t cam_block_idx(const size_t cam) const noexcept {
     return kBALCameraBlockSize * cam;
@@ -97,10 +101,6 @@ size_t cam_block_idx(const size_t cam) const noexcept {
 size_t point_block_idx(const size_t point) const noexcept {
     return kTranslationDim * point;
 }
-
-std::size_t num_observations;
-std::size_t num_cameras;
-std::size_t num_points;
 
 std::vector<int> camera_idx;
 std::vector<int> point_idx;
