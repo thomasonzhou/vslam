@@ -45,9 +45,11 @@ const std::unordered_map<std::string, std::tuple<float, float, float>>
 constexpr float kViewWidth = 1920.0f;
 constexpr float kViewHeight = 1080.0f;
 namespace viz {
+  constexpr int kLineWidth = 2;
 
   void draw_point(const Eigen::Vector3d &point);
-  
+  void draw_line(const Eigen::Vector3d &v1, const Eigen::Vector3d &v2);
+
   void pangolin_run(const std::function<void()> &draw_fn);
 
   void pangolin_draw(const std::vector<trajectory_view> &traj_view);

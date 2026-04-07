@@ -96,7 +96,7 @@ void pangolin_run(const std::function<void()> &draw_fn){
 
   void pangolin_draw(const std::vector<trajectory_view> &traj_views) {
     pangolin_run([&](){
-    glLineWidth(2);
+    glLineWidth(kLineWidth);
     for (const auto &traj_view : traj_views) {
       draw_trajectory(traj_view.poses, traj_view.pg_config);
     }});

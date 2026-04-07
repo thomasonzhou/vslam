@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
 
   const std::string problem_path = "../problem-16-22106-pre.txt";
   util::BALProblem bal_problem(problem_path);
+  util::BALProblem bal_problem_untouched(problem_path);
 
   ceres::Problem problem;
   
@@ -29,6 +30,6 @@ int main(int argc, char **argv) {
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
-  viz::pangolin_draw(bal_problem);
+  viz::pangolin_draw(bal_problem, bal_problem_untouched);
   return 0;
 }
