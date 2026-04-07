@@ -1,15 +1,15 @@
 #include "orb.h"
 
 namespace frontend {
-void compute_orb(const cv::Mat &img, std::vector<cv::KeyPoint> &keypoints,
-                 std::vector<Descriptor> &descriptors) {
+void compute_orb(const cv::Mat& img, std::vector<cv::KeyPoint>& keypoints,
+                 std::vector<Descriptor>& descriptors) {
   // for each keypoint, determine the orientation
   constexpr int FAST_block_size = 16;
   constexpr int FAST_block_radius = FAST_block_size / 2;
   constexpr int BRIEF_radius = 16;
   constexpr int border = std::max(BRIEF_radius, FAST_block_radius) * 2;
 
-  for (const cv::KeyPoint &kp : keypoints) {
+  for (const cv::KeyPoint& kp : keypoints) {
     const int center_x = cvRound(kp.pt.x);
     const int center_y = cvRound(kp.pt.y);
 
@@ -19,8 +19,8 @@ void compute_orb(const cv::Mat &img, std::vector<cv::KeyPoint> &keypoints,
       continue;
     }
 
-    double m10 = 0.0; // horizontal mass
-    double m01 = 0.0; // vertical mass
+    double m10 = 0.0;  // horizontal mass
+    double m01 = 0.0;  // vertical mass
 
     for (int r = -FAST_block_radius; r <= FAST_block_radius; ++r) {
       for (int c = -FAST_block_radius; c <= FAST_block_radius; ++c) {
@@ -30,7 +30,7 @@ void compute_orb(const cv::Mat &img, std::vector<cv::KeyPoint> &keypoints,
       }
     }
 
-    constexpr double epsilon = 10e-9; // for numerical stability
+    constexpr double epsilon = 10e-9;  // for numerical stability
     const double radius = std::sqrt(m10 * m10 + m01 * m01) + epsilon;
     const double sin_theta = m01 / radius;
     const double cos_theta = m10 / radius;
@@ -73,17 +73,14 @@ void compute_orb(const cv::Mat &img, std::vector<cv::KeyPoint> &keypoints,
   }
 }
 
-void brute_force_match(const std::vector<Descriptor> &d1,
-                       const std::vector<Descriptor> &d2,
-                       std::vector<cv::DMatch> &matches) {
-
+void brute_force_match(const std::vector<Descriptor>& d1,
+                       const std::vector<Descriptor>& d2,
+                       std::vector<cv::DMatch>& matches) {
   for (int i1 = 0; i1 < d1.size(); ++i1) {
-    if (d1[i1].empty())
-      continue;
+    if (d1[i1].empty()) continue;
     cv::DMatch match{i1, placeholder_idx, max_hamming_dist};
     for (int i2 = 0; i2 < d2.size(); ++i2) {
-      if (d2[i2].empty())
-        continue;
+      if (d2[i2].empty()) continue;
 
       int hamming_dist = 0;
       for (int chunk = 0; chunk < ORB_chunks; ++chunk) {
@@ -100,4 +97,4 @@ void brute_force_match(const std::vector<Descriptor> &d1,
     }
   }
 }
-}; // namespace frontend
+};  // namespace frontend

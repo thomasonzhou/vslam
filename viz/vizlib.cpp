@@ -1,16 +1,15 @@
 #include "viz/vizlib.h"
 
-namespace viz
-{  
+namespace viz {
 
-void draw_trajectory(const poseVector &poses, const pangolin_config &pg_config);
-void draw_axes(const Sophus::SE3d &pose);
-void connect_axes(const Sophus::SE3d &pose1, const Sophus::SE3d &pose2,
-                  const pangolin_config &pg_config);
-void draw_line(const Eigen::Vector3d &v1, const Eigen::Vector3d &v2);
+void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config);
+void draw_axes(const Sophus::SE3d& pose);
+void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
+                  const pangolin_config& pg_config);
+void draw_line(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
 
-void draw_trajectory(const poseVector &poses,
-                     const pangolin_config &pg_config) {
+void draw_trajectory(const poseVector& poses,
+                     const pangolin_config& pg_config) {
   for (size_t i = 0; i < poses.size(); ++i) {
     if (pg_config.draw_pose_axes_) {
       draw_axes(poses[i]);
@@ -21,7 +20,7 @@ void draw_trajectory(const poseVector &poses,
   }
 }
 
-void draw_axes(const Sophus::SE3d &pose) {
+void draw_axes(const Sophus::SE3d& pose) {
   constexpr double axisLength = 0.1;
   const Eigen::Vector3d Ow = pose.translation();
   const Eigen::Vector3d Ox = pose * (axisLength * Eigen::Vector3d(1.0, 0, 0));
@@ -37,15 +36,15 @@ void draw_axes(const Sophus::SE3d &pose) {
   glEnd();
 }
 
-void connect_axes(const Sophus::SE3d &pose1, const Sophus::SE3d &pose2,
-                  const pangolin_config &pg_config) {
+void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
+                  const pangolin_config& pg_config) {
   const Eigen::Vector3d t1 = pose1.translation();
   const Eigen::Vector3d t2 = pose2.translation();
   glBegin(GL_LINES);
 
   auto it = color_map.find(pg_config.trajectory_color_);
   if (it != color_map.end()) {
-    const auto &[r, g, b] = it->second;
+    const auto& [r, g, b] = it->second;
     glColor3f(r, g, b);
   } else {
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -55,52 +54,55 @@ void connect_axes(const Sophus::SE3d &pose1, const Sophus::SE3d &pose2,
   glEnd();
 }
 
-void draw_line(const Eigen::Vector3d &v1, const Eigen::Vector3d &v2) {
+void draw_line(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2) {
   glVertex3d(v1[0], v1[1], v1[2]);
   glVertex3d(v2[0], v2[1], v2[2]);
 }
 
-void draw_point(const Eigen::Vector3d &point){
+void draw_point(const Eigen::Vector3d& point) {
   glVertex3d(point[0], point[1], point[2]);
 }
 
-void pangolin_run(const std::function<void()> &draw_fn){
-    pangolin::CreateWindowAndBind("Pangolin Visualizer", kViewWidth, kViewHeight);
-    glEnable(GL_DEPTH_TEST); // enable 3D depth buffer for occlusion
-    glEnable(GL_BLEND);      // enable translucent objects
-    glBlendFunc(GL_SRC_ALPHA,
-                GL_ONE_MINUS_SRC_ALPHA); // weighted blend for translucent objects
+void pangolin_run(const std::function<void()>& draw_fn) {
+  pangolin::CreateWindowAndBind("Pangolin Visualizer", kViewWidth, kViewHeight);
+  glEnable(GL_DEPTH_TEST);  // enable 3D depth buffer for occlusion
+  glEnable(GL_BLEND);       // enable translucent objects
+  glBlendFunc(
+      GL_SRC_ALPHA,
+      GL_ONE_MINUS_SRC_ALPHA);  // weighted blend for translucent objects
 
-    pangolin::OpenGlRenderState s_cam(
-        pangolin::ProjectionMatrix(kViewWidth, kViewHeight, 500, 500, 512, 389, 0.1,
-                                  1000), // intrinsics
-        pangolin::ModelViewLookAt(0, 0, 50, 0, 0, 0, 0.0, -1.0,
-                                  0.0)); // extrinsics
+  pangolin::OpenGlRenderState s_cam(
+      pangolin::ProjectionMatrix(kViewWidth, 500, kViewHeight, 500, 512, 389,
+                                 0.1,
+                                 1000),  // intrinsics
+      pangolin::ModelViewLookAt(0, 0, 50, 0, 0, 0, 0.0, -1.0,
+                                0.0));  // extrinsics
 
-    pangolin::View &d_cam = pangolin::CreateDisplay()
-                                .SetBounds(0.0, 1.0, 0.0, 1.0, -kViewWidth / kViewHeight)
-                                .SetHandler(new pangolin::Handler3D(s_cam));
+  pangolin::View& d_cam =
+      pangolin::CreateDisplay()
+          .SetBounds(0.0, 1.0, 0.0, 1.0, -kViewWidth / kViewHeight)
+          .SetHandler(new pangolin::Handler3D(s_cam));
 
-    constexpr float white = 1.0f;
-    while (!pangolin::ShouldQuit()) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      d_cam.Activate(s_cam); // use s_cam for display
-      glClearColor(white, white, white, white);
-      
-      draw_fn();
+  constexpr float white = 1.0f;
+  while (!pangolin::ShouldQuit()) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    d_cam.Activate(s_cam);  // use s_cam for display
+    glClearColor(white, white, white, white);
 
-      pangolin::FinishFrame();
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
+    draw_fn();
+
+    pangolin::FinishFrame();
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
 }
 
-  void pangolin_draw(const std::vector<trajectory_view> &traj_views) {
-    pangolin_run([&](){
+void pangolin_draw(const std::vector<trajectory_view>& traj_views) {
+  pangolin_run([&]() {
     glLineWidth(kLineWidth);
-    for (const auto &traj_view : traj_views) {
+    for (const auto& traj_view : traj_views) {
       draw_trajectory(traj_view.poses, traj_view.pg_config);
-    }});
-  }
+    }
+  });
+}
 
-
-} // namespace viz
+}  // namespace viz

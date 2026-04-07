@@ -8,14 +8,14 @@
 namespace frontend {
 typedef std::vector<std::uint32_t> Descriptor;
 
-void compute_orb(const cv::Mat &img, std::vector<cv::KeyPoint> &keypoints,
-                 std::vector<Descriptor> &descriptors);
+void compute_orb(const cv::Mat& img, std::vector<cv::KeyPoint>& keypoints,
+                 std::vector<Descriptor>& descriptors);
 constexpr int ORB_chunks = 8;
 constexpr int ORB_chunk_bits = 32;
 
-void brute_force_match(const std::vector<Descriptor> &d1,
-                       const std::vector<Descriptor> &d2,
-                       std::vector<cv::DMatch> &matches);
+void brute_force_match(const std::vector<Descriptor>& d1,
+                       const std::vector<Descriptor>& d2,
+                       std::vector<cv::DMatch>& matches);
 constexpr int max_hamming_dist = 256;
 constexpr int accepted_hamming_dist = 30;
 constexpr int placeholder_idx = 0;
@@ -280,4 +280,4 @@ static int ORB_bit_pattern_31[256 * 4] = {
     7,   0,   12,  -2 /*mean (0.127002), correlation (0.537452)*/,
     -1,  -6,  0,   -11 /*mean (0.127148), correlation (0.547401)*/
 };
-}; // namespace frontend
+};  // namespace frontend

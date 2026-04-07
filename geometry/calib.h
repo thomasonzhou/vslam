@@ -17,7 +17,7 @@ struct PinholeCameraIntrinsics {
     K << fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0;
   }
 
-  void scale(const double scale_factor) noexcept{
+  void scale(const double scale_factor) noexcept {
     K(0, 0) *= scale_factor;
     K(1, 1) *= scale_factor;
     K(0, 2) *= scale_factor;
@@ -30,10 +30,10 @@ struct PinholeCameraIntrinsics {
   }
 };
 
-inline cv::Point2d pixel_to_camera(const cv::Point2d &pixel,
-                            const PinholeCameraIntrinsics &intrinsics) {
+inline cv::Point2d pixel_to_camera(const cv::Point2d& pixel,
+                                   const PinholeCameraIntrinsics& intrinsics) {
   return cv::Point2d((pixel.x - intrinsics.cx()) / intrinsics.fx(),
                      (pixel.y - intrinsics.cy()) / intrinsics.fy());
 };
 
-}; // namespace geometry
+};  // namespace geometry

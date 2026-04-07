@@ -6,15 +6,14 @@
 namespace estimation::pnp {
 
 struct NaivePnPSolver : public PnPSolver {
-
   void solve(const std::vector<Eigen::Vector3d,
-                               Eigen::aligned_allocator<Eigen::Vector3d>>
-                 &points3d_cam1,
+                               Eigen::aligned_allocator<Eigen::Vector3d>>&
+                 points3d_cam1,
              const std::vector<Eigen::Vector2d,
-                               Eigen::aligned_allocator<Eigen::Vector2d>>
-                 &points2d_img2,
-             const geometry::PinholeCameraIntrinsics &intrinsics2,
-             Sophus::SE3d &c2_T_c1) const override {
+                               Eigen::aligned_allocator<Eigen::Vector2d>>&
+                 points2d_img2,
+             const geometry::PinholeCameraIntrinsics& intrinsics2,
+             Sophus::SE3d& c2_T_c1) const override {
     constexpr int max_iterations = 10;
     // pertubation norm threshold
     constexpr double kConvergenceEpsilon = 1e-6;
@@ -34,7 +33,6 @@ struct NaivePnPSolver : public PnPSolver {
     Eigen::Matrix<double, 6, 1> dx;
 
     for (int iter = 0; iter < max_iterations; ++iter) {
-
       H_gn = Eigen::Matrix<double, 6, 6>::Zero();
       b_gn = Eigen::Matrix<double, 6, 1>::Zero();
 
@@ -46,7 +44,8 @@ struct NaivePnPSolver : public PnPSolver {
         cost += 0.5 * error.squaredNorm();
 
         Eigen::Matrix<double, 2, 6> J =
-            geometry::jacobian_pixel_error_wrt_perturbation(point3d_cam2, intrinsics2);
+            geometry::jacobian_pixel_error_wrt_perturbation(point3d_cam2,
+                                                            intrinsics2);
 
         H_gn += -J.transpose() * J;
         b_gn += J.transpose() * error;
@@ -102,7 +101,6 @@ struct NaivePnPSolver : public PnPSolver {
       constexpr double tr_can_expand_ratio = 0.8;
       constexpr double tr_scale = 2.0;
       if (gain_ratio > 0.0) {
-
         // loss decreased
         cost = candidate_cost;
         c2_T_c1 = candidate_pose;
@@ -123,4 +121,4 @@ struct NaivePnPSolver : public PnPSolver {
   }
 };
 
-}; // namespace estimation::pnp
+};  // namespace estimation::pnp

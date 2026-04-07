@@ -1,20 +1,19 @@
 #pragma once
 
-#include "estimation/icp/icp.h"
-
 #include <Eigen/SVD>
 #include <algorithm>
 
+#include "estimation/icp/icp.h"
+
 namespace estimation::icp {
 struct SVD_ICPSolver : public ICPSolver {
-  void solve(
-      const std::vector<Eigen::Vector3d,
-                        Eigen::aligned_allocator<Eigen::Vector3d>>
-          &points3d_cam1,
-      const std::vector<Eigen::Vector3d,
-                        Eigen::aligned_allocator<Eigen::Vector3d>>
-          &points3d_cam2,
-      Sophus::SE3d &c2_T_c1) const override {
+  void solve(const std::vector<Eigen::Vector3d,
+                               Eigen::aligned_allocator<Eigen::Vector3d>>&
+                 points3d_cam1,
+             const std::vector<Eigen::Vector3d,
+                               Eigen::aligned_allocator<Eigen::Vector3d>>&
+                 points3d_cam2,
+             Sophus::SE3d& c2_T_c1) const override {
     Eigen::Vector3d centroid1 = Eigen::Vector3d::Zero();
     Eigen::Vector3d centroid2 = Eigen::Vector3d::Zero();
     const size_t points = std::min(points3d_cam1.size(), points3d_cam2.size());
@@ -51,4 +50,4 @@ struct SVD_ICPSolver : public ICPSolver {
   }
 };
 
-} // namespace estimation::icp
+}  // namespace estimation::icp
