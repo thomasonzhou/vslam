@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
 
   ceres::Solver::Options options;
   options.minimizer_progress_to_stdout = true;
+  options.trust_region_strategy_type =  ceres::DOGLEG;
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
 
