@@ -21,6 +21,8 @@ constexpr int kBALCameraBlockSize =
 constexpr int kFocalIdx = kPoseDim + 0;
 constexpr int kK1Idx = kPoseDim + 1;
 constexpr int kK2Idx = kPoseDim + 2;
+
+constexpr double kFocalLengthGuess = 1500;
 }  // namespace util::bal
 
 namespace util {
