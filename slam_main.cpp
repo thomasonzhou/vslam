@@ -8,6 +8,7 @@
 
 #include <sophus/se3.hpp>
 #include "util/bal.h"
+#include "viz/vizlib.h"
 
 using BlockSolverType = g2o::BlockSolverX;
 using LinearSolverType = g2o::LinearSolverDense<BlockSolverType::PoseMatrixType>;
@@ -93,9 +94,24 @@ int main(int argc, char** argv) {
     optimizer.addEdge(edge);
   }
 
+
+  std::vector<Eigen::Vector3d> points_viz;
+  points_viz.reserve(points.size());
+  for (size_t point = 0; point < points.size(); ++point){
+    points_viz.emplace_back(points[point]->estimate());
+  }
+
   optimizer.initializeOptimization();
   constexpr int kIters = 10;
   optimizer.optimize(kIters);
+
+  std::vector<Eigen::Vector3d> points_viz2;
+  points_viz2.reserve(points.size());
+  for (size_t point = 0; point < points.size(); ++point){
+    points_viz2.emplace_back(points[point]->estimate());
+  }
+
+  viz::pangolin_draw(points_viz, points_viz2);
 
   return 0;
 }

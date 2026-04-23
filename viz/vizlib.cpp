@@ -2,16 +2,16 @@
 
 namespace viz {
 
-void draw_trajectory(const poseVector& poses, const pangolin_config& pg_config);
+void draw_trajectory(const poseVector& poses, const traj_viz_config& pg_config);
 void draw_axes(const Sophus::SE3d& pose);
 void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
-                  const pangolin_config& pg_config);
+                  const traj_viz_config& pg_config);
 void draw_line(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
 
 void draw_trajectory(const poseVector& poses,
-                     const pangolin_config& pg_config) {
+                     const traj_viz_config& pg_config) {
   for (size_t i = 0; i < poses.size(); ++i) {
-    if (pg_config.draw_pose_axes_) {
+    if (pg_config.draw_pose_axes) {
       draw_axes(poses[i]);
     }
     if (i > 0) {
@@ -37,18 +37,11 @@ void draw_axes(const Sophus::SE3d& pose) {
 }
 
 void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
-                  const pangolin_config& pg_config) {
+                  const traj_viz_config& pg_config) {
   const Eigen::Vector3d t1 = pose1.translation();
   const Eigen::Vector3d t2 = pose2.translation();
   glBegin(GL_LINES);
-
-  auto it = color_map.find(pg_config.trajectory_color_);
-  if (it != color_map.end()) {
-    const auto& [r, g, b] = it->second;
-    glColor3f(r, g, b);
-  } else {
-    glColor3f(0.0f, 0.0f, 0.0f);
-  }
+  set_color(pg_config.trajectory_color);
 
   draw_line(t1, t2);
   glEnd();
@@ -102,6 +95,25 @@ void pangolin_draw(const std::vector<trajectory_view>& traj_views) {
     for (const auto& traj_view : traj_views) {
       draw_trajectory(traj_view.poses, traj_view.pg_config);
     }
+  });
+}
+
+
+void pangolin_draw(const std::vector<Eigen::Vector3d>& points) {
+  pangolin_run([&]() {
+    draw_points(points.size(), [&](size_t i){
+      return points[i];
+    });
+  });
+}
+
+void pangolin_draw(const std::vector<Eigen::Vector3d>& points, const std::vector<Eigen::Vector3d>& points2) {
+  pangolin_run([&]() {
+    draw_points_compare(points.size(), [&](size_t i){
+      return points[i];
+    }, points2.size(), [&](size_t i){
+      return points2[i];
+    });
   });
 }
 
