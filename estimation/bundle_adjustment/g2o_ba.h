@@ -22,7 +22,7 @@ public:
 EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 void setToOriginImpl() override{
     _estimate = Eigen::Vector3d::Zero(); // is this a good estimate?
-    _estimate[kFocalLengthIdx] = util::bal::kFocalLengthGuess;
+    // _estimate[kFocalLengthIdx] = util::bal::kFocalLengthGuess;
 }
 
 void oplusImpl(const double* update) override{
@@ -33,6 +33,7 @@ void oplusImpl(const double* update) override{
 Eigen::Vector2d project(const Eigen::Vector3d& camera_point) const{
 
     //leading negative because of BAL storage representation
+    // *note that this does not hold for the final dataset
     const double x = -camera_point[0] / camera_point[2];
     const double y = -camera_point[1] / camera_point[2];
     const double radius_2 = x * x + y * y;

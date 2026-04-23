@@ -1,14 +1,18 @@
-#include "estimation/bundle_adjustment/g2o_ba.h"
 #include <g2o/core/block_solver.h>
 #include <g2o/core/optimization_algorithm_dogleg.h>
 #include <g2o/solvers/dense/linear_solver_dense.h>
 #include <g2o/core/sparse_optimizer.h>
+#include <g2o/core/robust_kernel_impl.h>
 
 #include <ceres/rotation.h>
 
 #include <sophus/se3.hpp>
+
+#include <thread>
 #include "util/bal.h"
 #include "viz/vizlib.h"
+#include "viz/g2o_viz.h"
+#include "estimation/bundle_adjustment/g2o_ba.h"
 
 using BlockSolverType = g2o::BlockSolverX;
 using LinearSolverType = g2o::LinearSolverDense<BlockSolverType::PoseMatrixType>;
@@ -46,12 +50,11 @@ int main(int argc, char** argv) {
 
   int id = 0;
   for (size_t cam = 0; cam < bal_problem.num_cameras; ++cam){
-    VertexIntrinsics* v_k = new VertexIntrinsics();
     VertexPose* v_pose = new VertexPose();
-
+    
     const auto cam_data = bal_problem.camera_data(cam);
     v_pose->setId(id++);
-
+    
     Eigen::Quaterniond q;
     ceres::AngleAxisToQuaternion<ceres::EigenQuaternionOrder>(cam_data, q.coeffs().data());
     Sophus::SE3d pose;
@@ -64,13 +67,16 @@ int main(int argc, char** argv) {
       poses[0]->setFixed(true);
     }
     optimizer.addVertex(v_pose);
-    
+
+    VertexIntrinsics* v_k = new VertexIntrinsics();
     v_k->setId(id++);
     v_k->setEstimate(Eigen::Map<const Eigen::Vector3d>(cam_data+util::bal::kPoseDim));
+    // v_k->setFixed(true);
     optimizer.addVertex(v_k);
     intrinsics.emplace_back(v_k);
+    
   }
-
+  
   for (size_t point = 0; point < bal_problem.num_points; ++point){
     VertexPoint* v_point = new VertexPoint();
     v_point->setId(id++);
@@ -91,6 +97,7 @@ int main(int argc, char** argv) {
 
     edge->setMeasurement(Eigen::Map<const Eigen::Vector2d>(bal_problem.observation_data(obs)));
     edge->setInformation(Eigen::Matrix2d::Identity());
+    edge->setRobustKernel(new g2o::RobustKernelHuber());
     optimizer.addEdge(edge);
   }
 
@@ -101,17 +108,27 @@ int main(int argc, char** argv) {
     points_viz.emplace_back(points[point]->estimate());
   }
 
+  std::vector<Eigen::Vector3d> points_viz2 = points_viz;
+
+  std::mutex points_viz2_m;
+  std::thread draw_thread([&](){
+    viz::pangolin_draw(points_viz.size(), [&](size_t i){
+      return points_viz[i];
+    }, points_viz2.size(), [&](size_t i){
+      std::lock_guard lk(points_viz2_m);
+      return points_viz2[i];
+    });}
+  );
+
   optimizer.initializeOptimization();
-  constexpr int kIters = 10;
+
+  viz::PointUpdateAction update_action(points, points_viz2, points_viz2_m);
+  optimizer.addPostIterationAction(&update_action);
+  
+  constexpr int kIters = 20; 
   optimizer.optimize(kIters);
 
-  std::vector<Eigen::Vector3d> points_viz2;
-  points_viz2.reserve(points.size());
-  for (size_t point = 0; point < points.size(); ++point){
-    points_viz2.emplace_back(points[point]->estimate());
-  }
-
-  viz::pangolin_draw(points_viz, points_viz2);
+  draw_thread.join();
 
   return 0;
 }

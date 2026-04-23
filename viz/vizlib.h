@@ -65,24 +65,25 @@ void pangolin_draw(const std::vector<Eigen::Vector3d>& points, const std::vector
 struct point_config{
   std::string point_color = "black";
   float point_size = 2.0f;
+  float point_alpha = 1.0f;
 };
 
 struct line_config{
   std::string line_color = "dark_red";
-  float line_alpha = 0.25;
+  float line_alpha = 0.05;
   int line_width = 2;
 };
 
 struct point_compare_config{
-  point_config config1{"gray", 2.0f};
-  point_config config2{"black", 2.0f};
+  point_config config1{"black", 2.0f, 0.25};
+  point_config config2{"gray", 2.0f};
   line_config correspondence_config{};
   bool draw_correspondence_lines = true;
 };
 
 template<typename PointGetter>
 void draw_points(const size_t count, PointGetter get_point, const point_config& p_config = point_config{}){
-  set_color(p_config.point_color);
+  set_color(p_config.point_color, p_config.point_alpha);
   glPointSize(p_config.point_size);
   glBegin(GL_POINTS);
   for (size_t i = 0; i < count; ++i) {
@@ -110,6 +111,13 @@ void draw_points_compare(const size_t count1, PointGetter1 get_point1, const siz
   if(pcomp_config.draw_correspondence_lines){
     draw_lines_between(count1, get_point1, count2, get_point2, pcomp_config.correspondence_config);
   }
+}
+
+template<typename PointGetter1, typename PointGetter2>
+void pangolin_draw(const size_t count1, PointGetter1 get_point1, const size_t count2, PointGetter2 get_point2, const point_compare_config& pcomp_config = point_compare_config{}){
+  pangolin_run([&]() {
+    draw_points_compare(count1, get_point1, count2, get_point2);
+  });
 }
 
 
