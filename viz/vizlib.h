@@ -30,7 +30,7 @@ constexpr float kViewWidth = 1920.0f;
 constexpr float kViewHeight = 1080.0f;
 namespace viz {
 
-const std::unordered_map<std::string, std::tuple<float, float, float>>
+inline const std::unordered_map<std::string, std::tuple<float, float, float>>
     kColorMap = {
                   {"red", {1.0f, 0.0f, 0.0f}},
                   {"dark_red", {0.5f, 0.0f, 0.0f}},
@@ -38,13 +38,13 @@ const std::unordered_map<std::string, std::tuple<float, float, float>>
                   {"gray", {0.5f, 0.5f, 0.5f}},
                   {"blue", {0.0f, 0.0f, 1.0f}}};
 
-inline void set_color(const std::string& color) noexcept{
+inline void set_color(const std::string& color, const float alpha = 1.0f) noexcept{
   auto it = kColorMap.find(color);
   if (it != kColorMap.end()) {
     const auto& [r, g, b] = it->second;
-    glColor3f(r, g, b);
+    glColor4f(r, g, b, alpha);
   } else {
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glColor4f(0.0f, 0.0f, 0.0f, alpha);
   }
 }
 constexpr int kLineWidth = 2;
@@ -67,10 +67,16 @@ struct point_config{
   float point_size = 2.0f;
 };
 
+struct line_config{
+  std::string line_color = "dark_red";
+  float line_alpha = 0.25;
+  int line_width = 2;
+};
+
 struct point_compare_config{
   point_config config1{"gray", 2.0f};
   point_config config2{"black", 2.0f};
-  std::string line_color = "dark_red";
+  line_config correspondence_config{};
   bool draw_correspondence_lines = true;
 };
 
@@ -86,9 +92,9 @@ void draw_points(const size_t count, PointGetter get_point, const point_config& 
 }
 
 template <typename PointGetter1, typename PointGetter2>
-void draw_lines_between(const size_t count1, PointGetter1 get_point1, const size_t count2, PointGetter2 get_point2, const std::string& color = "dark_red"){
-  set_color(color);
-  glLineWidth(kLineWidth);
+void draw_lines_between(const size_t count1, PointGetter1 get_point1, const size_t count2, PointGetter2 get_point2, const line_config& l_config = line_config{}){
+  set_color(l_config.line_color, l_config.line_alpha);
+  glLineWidth(l_config.line_width);
   glBegin(GL_LINES);
   for (size_t i = 0; i < std::min(count1, count2); ++i) {
     draw_line(get_point1(i), get_point2(i));
@@ -102,7 +108,7 @@ void draw_points_compare(const size_t count1, PointGetter1 get_point1, const siz
   draw_points(count2, get_point2, pcomp_config.config2);
 
   if(pcomp_config.draw_correspondence_lines){
-    draw_lines_between(count1, get_point1, count2, get_point2, pcomp_config.line_color);
+    draw_lines_between(count1, get_point1, count2, get_point2, pcomp_config.correspondence_config);
   }
 }
 

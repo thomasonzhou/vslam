@@ -19,7 +19,7 @@ void pangolin_draw(const util::BALProblem& bal_problem,
       return Eigen::Map<const Eigen::Vector3d> (bal_problem.points(i));
     }, bal_problem2.num_points, [&](size_t i){
       return Eigen::Map<const Eigen::Vector3d> (bal_problem2.points(i));
-    })
+    });
   });
 }
 
