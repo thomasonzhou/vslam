@@ -1,6 +1,8 @@
 #pragma once
-#include <opencv2/core.hpp>
+
 #include <vector>
+
+#include <opencv2/core.hpp>
 
 #include "geometry/bilinear.h"
 

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <algorithm>
+#include <iostream>
+#include <vector>
+
 #include "estimation/pnp/pnp.h"
 #include "geometry/reprojection.h"
 
@@ -61,10 +65,9 @@ struct NaivePnPSolver : public PnPSolver {
         // case 2: scale steepest descent to trust region boundary
         if (dx_sd.norm() >= delta) {
           dx = (delta / dx_sd.norm()) * dx_sd;
-        }
-        // case 3: dog leg, full steepest descent plus scaled Gauss Newton to
-        // boundary
-        else {
+        } else {
+          // case 3: dog leg, full steepest descent plus scaled Gauss Newton to
+          // boundary
           const Eigen::Matrix<double, 6, 1> dx_dogleg = dx_gn - dx_sd;
 
           const double c1 = dx_dogleg.transpose() * dx_dogleg;
@@ -121,4 +124,4 @@ struct NaivePnPSolver : public PnPSolver {
   }
 };
 
-};  // namespace estimation::pnp
+}  // namespace estimation::pnp

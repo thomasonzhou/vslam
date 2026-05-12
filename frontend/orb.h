@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace frontend {
-typedef std::vector<std::uint32_t> Descriptor;
+using Descriptor = std::vector<std::uint32_t>;
 
 void compute_orb(const cv::Mat& img, std::vector<cv::KeyPoint>& keypoints,
                  std::vector<Descriptor>& descriptors);

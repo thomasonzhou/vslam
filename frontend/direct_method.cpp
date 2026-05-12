@@ -1,7 +1,9 @@
 #include "frontend/direct_method.h"
 
+#include <array>
 #include <mutex>
 #include <opencv2/imgproc.hpp>
+#include <vector>
 
 #include "geometry/bilinear.h"
 #include "geometry/reprojection.h"
@@ -76,7 +78,7 @@ class DirectMethodTracker {
     return geometry::cam2_from_cam1(depths1_[i], p1, K1_inv, intrinsics2_,
                                     img2_.size(), point2_data, T_12,
                                     kHalfPatch);
-  };
+  }
 
   const cv::Mat& img1_;
   const cv::Mat& img2_;

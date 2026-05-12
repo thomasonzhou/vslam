@@ -1,4 +1,6 @@
 #pragma once
+
+#include <algorithm>
 #include <opencv2/core.hpp>
 
 namespace geometry {

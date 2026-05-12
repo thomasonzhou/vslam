@@ -1,3 +1,7 @@
+#pragma once
+
+#include <vector>
+
 #include "estimation/icp/icp.h"
 
 namespace estimation::icp {

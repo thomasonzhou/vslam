@@ -1,9 +1,11 @@
 #pragma once
 
-#include <Eigen/Geometry>
-#include <sophus/se3.hpp>
 #include <string>
 #include <vector>
+
+#include <Eigen/Geometry>
+#include <sophus/se3.hpp>
+
 namespace util {
 
 using Eigen::aligned_allocator;

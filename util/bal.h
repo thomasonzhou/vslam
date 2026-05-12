@@ -1,13 +1,14 @@
 #pragma once
 #include <cstdlib>
-#include <filesystem>
 #include <fstream>
+#include <string>
 #include <vector>
 
 // helpers to parse bundle adjustment in the large files
 // https://grail.cs.washington.edu/projects/bal/
 
-namespace util::bal {
+namespace util {
+namespace bal {
 constexpr int kPixelDim = 2;
 constexpr int kRotationVecDim = 3;
 // constexpr int kQuaternionDim = kRotationVecDim + 1;
@@ -23,13 +24,11 @@ constexpr int kK1Idx = kPoseDim + 1;
 constexpr int kK2Idx = kPoseDim + 2;
 
 constexpr double kFocalLengthGuess = 1500;
-}  // namespace util::bal
-
-namespace util {
+}  // namespace bal
 
 class BALProblem {
  public:
-  explicit BALProblem(const std::filesystem::path& path) {
+  explicit BALProblem(const std::string& path) {
     std::ifstream in(path);
     in >> num_cameras >> num_points >> num_observations;
 

@@ -1,5 +1,6 @@
 #include "estimation/epipolar/epipolar.h"
-
+#include <iostream>
+#include <vector>
 namespace estimation::epipolar {
 void pose_estimation_2d2d(const std::vector<cv::KeyPoint>& keypoints1,
                           const std::vector<cv::KeyPoint>& keypoints2,
@@ -56,7 +57,7 @@ void pose_estimation_2d2d(const std::vector<cv::KeyPoint>& keypoints1,
     const cv::Mat epipolar_constraint = p2.t() * E * p1;
     std::cout << epipolar_constraint << '\n';
   }
-};
+}
 
 void triangulation(const std::vector<cv::KeyPoint>& keypoints1,
                    const std::vector<cv::KeyPoint>& keypoints2,
@@ -92,5 +93,5 @@ void triangulation(const std::vector<cv::KeyPoint>& keypoints1,
     points.emplace_back(x.at<double>(0, 0), x.at<double>(1, 0),
                         x.at<double>(2, 0));
   }
-};
+}
 }  // namespace estimation::epipolar

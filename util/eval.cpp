@@ -12,7 +12,9 @@ void compare_trajectories(const std::string& est_traj,
                           const std::string& gt_traj, const bool align_traj) {
   poseVector est_poses = trajectory_from_file(est_traj);
   const poseVector gt_poses = trajectory_from_file(gt_traj);
-  if (est_poses.size() == 0 || gt_poses.size() == 0) return;
+  if (est_poses.size() == 0 || gt_poses.size() == 0) {
+    return;
+  }
 
   // find the tf from the first pose of est to gt
   if (align_traj) {

@@ -1,4 +1,7 @@
 #pragma once
+
+#include <vector>
+
 #include <sophus/se3.hpp>
 
 #include "geometry/calib.h"
@@ -36,4 +39,4 @@ struct PointPixel {
 [[nodiscard]] Eigen::Vector2d camera_to_pixel(
     const Eigen::Vector3d& point3d,
     const geometry::PinholeCameraIntrinsics& intrinsics);
-};  // namespace geometry
+}  // namespace geometry

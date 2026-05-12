@@ -1,4 +1,7 @@
 #pragma once
+
+#include <vector>
+
 #include "estimation/pnp/pnp.h"
 
 namespace estimation::pnp {
@@ -14,4 +17,4 @@ struct G2OPnPSolver : public PnPSolver {
       Sophus::SE3d& c2_T_c1) const override;
 };
 
-};  // namespace estimation::pnp
+}  // namespace estimation::pnp

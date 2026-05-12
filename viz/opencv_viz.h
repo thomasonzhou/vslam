@@ -1,4 +1,8 @@
 #pragma once
+
+#include <algorithm>
+#include <vector>
+
 #include <opencv2/highgui.hpp>
 
 namespace viz {

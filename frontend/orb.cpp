@@ -1,4 +1,7 @@
-#include "orb.h"
+#include "frontend/orb.h"
+
+#include <algorithm>
+#include <vector>
 
 namespace frontend {
 void compute_orb(const cv::Mat& img, std::vector<cv::KeyPoint>& keypoints,
@@ -64,7 +67,7 @@ void compute_orb(const cv::Mat& img, std::vector<cv::KeyPoint>& keypoints,
         const uchar val2 = img.at<uchar>(y2, x2);
 
         if (val1 < val2) {
-          di |= (std::uint32_t(1) << bit);
+          di |= (static_cast<std::uint32_t>(1) << bit);
         }
       }
       d[chunk] = di;
@@ -77,10 +80,14 @@ void brute_force_match(const std::vector<Descriptor>& d1,
                        const std::vector<Descriptor>& d2,
                        std::vector<cv::DMatch>& matches) {
   for (int i1 = 0; i1 < d1.size(); ++i1) {
-    if (d1[i1].empty()) continue;
+    if (d1[i1].empty()) {
+      continue;
+    }
     cv::DMatch match{i1, placeholder_idx, max_hamming_dist};
     for (int i2 = 0; i2 < d2.size(); ++i2) {
-      if (d2[i2].empty()) continue;
+      if (d2[i2].empty()) {
+        continue;
+      }
 
       int hamming_dist = 0;
       for (int chunk = 0; chunk < ORB_chunks; ++chunk) {
@@ -97,4 +104,4 @@ void brute_force_match(const std::vector<Descriptor>& d1,
     }
   }
 }
-};  // namespace frontend
+}  // namespace frontend

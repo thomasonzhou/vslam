@@ -1,5 +1,5 @@
 #include "viz/vizlib.h"
-
+#include <vector>
 namespace viz {
 
 void draw_trajectory(const poseVector& poses, const traj_viz_config& pg_config);

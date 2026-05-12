@@ -1,6 +1,9 @@
 #pragma once
 
+#include <string>
+
 #include "viz/vizlib.h"
+
 namespace util {
 
 const auto est_config = traj_viz_config{false, "red"};

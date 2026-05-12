@@ -6,8 +6,10 @@
 #include <g2o/core/optimization_algorithm_gauss_newton.h>
 #include <g2o/solvers/dense/linear_solver_dense.h>
 
+#include <algorithm>
 #include <memory>
 #include <sophus/se3.hpp>
+#include <vector>
 
 namespace {
 // 1. define vertices for pose and edges for landmarks observed
@@ -35,7 +37,7 @@ class EdgeProjection
 
   EdgeProjection(const Eigen::Vector3d& pos3d,
                  const geometry::PinholeCameraIntrinsics& intrinsics)
-      : pos3d_(pos3d), intrinsics_(intrinsics) {};
+      : pos3d_(pos3d), intrinsics_(intrinsics) {}
 
   void computeError() override {
     const VertexPose* v = static_cast<const VertexPose*>(_vertices[0]);

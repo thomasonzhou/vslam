@@ -1,4 +1,5 @@
 #pragma once
+
 #include <opencv2/core.hpp>
 #include <sophus/se3.hpp>
 #include <vector>

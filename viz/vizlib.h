@@ -1,17 +1,19 @@
 #pragma once
 
-#include <pangolin/pangolin.h>
-
-#include <Eigen/Core>
 #include <algorithm>
 #include <chrono>
 #include <functional>
 #include <iostream>
-#include <sophus/se3.hpp>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+
+#include <pangolin/pangolin.h>
+
+#include <Eigen/Core>
+#include <sophus/se3.hpp>
+
 typedef std::vector<Sophus::SE3d, Eigen::aligned_allocator<Sophus::SE3d>>
     poseVector;
 

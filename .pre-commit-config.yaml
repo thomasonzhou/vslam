@@ -6,12 +6,10 @@ repos:
       - id: clang-format
         args: [
           -i,
-          --style=Google
-        ]
-      - id: clang-tidy
-        args: [
-          -p=build,
-          -fix-errors
+          --style=file
         ]
       - id: cpplint
-        args: ["--filter=-legal/copyright"]
+        args:
+          [
+            "--filter=-legal/copyright,-build/header_guard,-build/include_order,-whitespace/indent_namespace",
+          ]

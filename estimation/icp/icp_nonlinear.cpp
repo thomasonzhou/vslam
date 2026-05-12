@@ -8,7 +8,9 @@
 #include <g2o/solvers/dense/linear_solver_dense.h>
 
 #include <algorithm>
+#include <memory>
 #include <sophus/se3.hpp>
+#include <vector>
 
 namespace {
 
@@ -33,8 +35,8 @@ class EdgePointTranslation
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-  EdgePointTranslation(const Eigen::Vector3d& translation)
-      : translation_(translation) {};
+  explicit EdgePointTranslation(const Eigen::Vector3d& translation)
+      : translation_(translation) {}
 
   void computeError() override {
     const VertexPose* pose = static_cast<const VertexPose*>(_vertices[0]);
@@ -56,7 +58,7 @@ class EdgePointTranslation
   bool write(std::ostream& out) const override { return true; }
 
  private:
-  Eigen::Vector3d translation_;
+  Eigen::Vector3d translation_{};
 };
 
 typedef g2o::BlockSolver<g2o::BlockSolverTraits<kPoseDim, kTranslationDim>>
@@ -102,6 +104,6 @@ void NonlinearICPSolver::solve(
   optimizer.optimize(kIters);
 
   c2_T_c1 = v_pose->estimate();
-};
+}
 
 }  // namespace estimation::icp

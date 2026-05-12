@@ -29,8 +29,8 @@ int main(int argc, char** argv) {
   constexpr int kOdometryDim = 6;
   typedef g2o::BlockSolver<g2o::BlockSolverTraits<kPoseDim, kOdometryDim>>
       BlockSolverType;
-  typedef g2o::LinearSolverEigen<BlockSolverType::PoseMatrixType>
-      LinearSolverType;
+  using LinearSolverType =
+      g2o::LinearSolverEigen<BlockSolverType::PoseMatrixType>;
   auto solver = new g2o::OptimizationAlgorithmDogleg(
       std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>()));
 
@@ -66,7 +66,9 @@ int main(int argc, char** argv) {
       e->read(fin);
       optimizer.addEdge(e);
     }
-    if (!fin.good()) break;
+    if (!fin.good()) {
+      break;
+    }
   }
 
   std::vector<Eigen::Vector3d> points_unoptimized;

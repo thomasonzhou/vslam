@@ -1,5 +1,7 @@
 #include "geometry/reprojection.h"
 
+#include <vector>
+
 #include "geometry/bilinear.h"
 
 namespace geometry {
@@ -73,7 +75,8 @@ Eigen::Vector2d reprojection_error(
 
 double sum_of_squares_cost(
     const std::vector<Eigen::Vector3d,
-                      Eigen::aligned_allocator<Eigen::Vector3d>>& points3d_cam1,
+                      Eigen::aligned_allocator<Eigen::Vector3d> /*unused*/>&
+        points3d_cam1,
     const std::vector<Eigen::Vector2d,
                       Eigen::aligned_allocator<Eigen::Vector2d>>& points2d_img2,
     const geometry::PinholeCameraIntrinsics& intrinsics2,
@@ -95,4 +98,4 @@ Eigen::Vector2d camera_to_pixel(
       intrinsics.fx() * point3d[0] / point3d[2] + intrinsics.cx(),
       intrinsics.fy() * point3d[1] / point3d[2] + intrinsics.cy());
 }
-};  // namespace geometry
+}  // namespace geometry
