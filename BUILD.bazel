@@ -26,7 +26,7 @@ cc_library(
     ],
     copts = ["-I."],
     deps = [
-        ":viz",
+        "//:viz",
         "@eigen//:eigen",
         "@sophus//:sophus",
     ],
@@ -47,8 +47,8 @@ cc_library(
     ],
     copts = ["-I."],
     deps = [
-        ":estimation",
-        ":geometry",
+        "//:estimation",
+        "//:geometry",
         "@eigen//:eigen",
         "@opencv//:opencv",
         "@sophus//:sophus",
@@ -95,7 +95,7 @@ cc_library(
     ],
     copts = ["-I."],
     deps = [
-        ":geometry",
+        "//:geometry",
         "//third_party:g2o",
         "@eigen//:eigen",
         "@opencv//:opencv",
@@ -108,6 +108,7 @@ cc_binary(
     srcs = ["slam_main.cpp"],
     copts = ["-I."],
     deps = [
+        "//:viz",
         "//third_party:g2o",
         "@eigen//:eigen",
     ],

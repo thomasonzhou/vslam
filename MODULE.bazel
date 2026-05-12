@@ -23,6 +23,7 @@ git_repository(
     patches = [
         "//third_party/patches:pangolin-eigen-glew.patch",
     ],
+    patch_args = ["-p1"],
     build_file = "//third_party:foreign_src.BUILD.bazel",
 )
 

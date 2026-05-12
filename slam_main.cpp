@@ -5,6 +5,7 @@
 #include <g2o/core/optimization_algorithm_dogleg.h>
 #include <g2o/core/sparse_optimizer.h>
 #include <g2o/types/slam3d/types_slam3d.h>
+#include "viz/vizlib.h"
 
 int main(int argc, char** argv) {
   if (argc != 2){
@@ -45,12 +46,11 @@ int main(int argc, char** argv) {
       fin >> vertex_idx;
       v->setId(vertex_idx);
       v->read(fin);
-      optimizer.addVertex(v);
-      vertex_count++;
       if(vertex_idx == 0){
         v->setFixed(true);
       }
       optimizer.addVertex(v);
+      vertex_count++;
     }
     else if(name == "EDGE_SE3:QUAT"){
       g2o::EdgeSE3 *e = new g2o::EdgeSE3();
@@ -64,14 +64,28 @@ int main(int argc, char** argv) {
     if (!fin.good()) break;
   }
 
+  std::vector<Eigen::Vector3d> points_unoptimized;
+  points_unoptimized.reserve(vertex_count);
+  for (int i = 0; i < vertex_count; ++i){
+    auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
+    points_unoptimized.emplace_back(v->estimate().translation());
+  }
+
   std::cout << "read " << vertex_count << " vertices, " << edge_count << " edges" << std::endl;
   optimizer.initializeOptimization();
 
   constexpr int kOptimizeSteps = 30;
   optimizer.optimize(kOptimizeSteps);
 
-  const std::string output_file = "result_" + input_g2o_file;
-  optimizer.save(output_file.c_str());
+  viz::pangolin_draw(vertex_count,
+    [&points_unoptimized](size_t i){
+      return points_unoptimized[i];
+    }, vertex_count,
+    [&optimizer](size_t i){
+      auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
+      return v->estimate().translation();
+    }
+  );
 
   return 0;
 }

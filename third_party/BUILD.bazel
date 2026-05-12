@@ -14,8 +14,8 @@ PANGOLIN_DEFINES = [
 
 PANGOLIN_LINKOPTS = select({
     "@platforms//os:macos": [
-        "-framework Cocoa",
-        "-framework OpenGL",
+        "-Wl,-framework,Cocoa",
+        "-Wl,-framework,OpenGL",
     ],
     "@platforms//os:linux": [
         "-lGL",

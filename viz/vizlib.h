@@ -56,7 +56,7 @@ void pangolin_run(const std::function<void()>& draw_fn);
 
 void pangolin_draw(const std::vector<trajectory_view>& traj_view);
 inline void pangolin_draw(const trajectory_view& traj_view) {
-  pangolin_draw({traj_view});
+  pangolin_draw(std::vector<trajectory_view>{traj_view});
 }
 void pangolin_draw(const std::vector<Eigen::Vector3d>& points);
 void pangolin_draw(const std::vector<Eigen::Vector3d>& points, const std::vector<Eigen::Vector3d>& points2);
@@ -116,7 +116,7 @@ void draw_points_compare(const size_t count1, PointGetter1 get_point1, const siz
 template<typename PointGetter1, typename PointGetter2>
 void pangolin_draw(const size_t count1, PointGetter1 get_point1, const size_t count2, PointGetter2 get_point2, const point_compare_config& pcomp_config = point_compare_config{}){
   pangolin_run([&]() {
-    draw_points_compare(count1, get_point1, count2, get_point2);
+    draw_points_compare(count1, get_point1, count2, get_point2, pcomp_config);
   });
 }
 
