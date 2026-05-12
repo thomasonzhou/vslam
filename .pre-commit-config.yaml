@@ -8,10 +8,10 @@ repos:
           -i,
           --style=Google
         ]
-      # - id: clang-tidy
-      #   args: [
-      #     -p=build,
-      #     -fix-errors
-      #   ]
+      - id: clang-tidy
+        args: [
+          -p=build,
+          -fix-errors
+        ]
       - id: cpplint
         args: ["--filter=-legal/copyright"]
