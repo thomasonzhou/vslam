@@ -1,0 +1,114 @@
+package(default_visibility = ["//visibility:public"])
+
+
+cc_library(
+    name = "viz",
+    srcs = ["viz/vizlib.cpp"],
+    hdrs = ["viz/vizlib.h"],
+    copts = ["-I."],
+    deps = [
+        "//third_party:pangolin",
+        "@eigen//:eigen",
+        "@sophus//:sophus",
+    ],
+)
+
+cc_library(
+    name = "utils",
+    srcs = [
+        "util/eval.cpp",
+        "util/utillib.cpp",
+    ],
+    hdrs = [
+        "util/bal.h",
+        "util/eval.h",
+        "util/utillib.h",
+    ],
+    copts = ["-I."],
+    deps = [
+        ":viz",
+        "@eigen//:eigen",
+        "@sophus//:sophus",
+    ],
+)
+
+cc_library(
+    name = "frontend",
+    srcs = [
+        "frontend/direct_method.cpp",
+        "frontend/optical_flow.cpp",
+        "frontend/orb.cpp",
+    ],
+    hdrs = [
+        "frontend/direct_method.h",
+        "frontend/optical_flow.h",
+        "frontend/orb.h",
+        "frontend/point_sampling.h",
+    ],
+    copts = ["-I."],
+    deps = [
+        ":estimation",
+        ":geometry",
+        "@eigen//:eigen",
+        "@opencv//:opencv",
+        "@sophus//:sophus",
+    ],
+)
+
+cc_library(
+    name = "geometry",
+    srcs = [
+        "geometry/reprojection.cpp",
+    ],
+    hdrs = [
+        "geometry/bilinear.h",
+        "geometry/calib.h",
+        "geometry/coordinate_utils.h",
+        "geometry/reprojection.h",
+        "geometry/rotation.h",
+    ],
+    copts = ["-I."],
+    deps = [
+        "@eigen//:eigen",
+        "@opencv//:opencv",
+        "@sophus//:sophus",
+    ],
+)
+
+cc_library(
+    name = "estimation",
+    srcs = [
+        "estimation/epipolar/epipolar.cpp",
+        "estimation/icp/icp_nonlinear.cpp",
+        "estimation/pnp/pnp_g2o.cpp",
+    ],
+    hdrs = [
+        "estimation/bundle_adjustment/g2o_ba.h",
+        "estimation/bundle_adjustment/snavely_reprojection.h",
+        "estimation/epipolar/epipolar.h",
+        "estimation/icp/icp.h",
+        "estimation/icp/icp_nonlinear.h",
+        "estimation/icp/icp_svd.h",
+        "estimation/pnp/pnp.h",
+        "estimation/pnp/pnp_g2o.h",
+        "estimation/pnp/pnp_naive.h",
+    ],
+    copts = ["-I."],
+    deps = [
+        ":geometry",
+        "//third_party:g2o",
+        "@eigen//:eigen",
+        "@opencv//:opencv",
+        "@sophus//:sophus",
+    ],
+)
+
+cc_binary(
+    name = "vslam",
+    srcs = ["slam_main.cpp"],
+    copts = ["-I."],
+    deps = [
+        "//third_party:g2o",
+        "@eigen//:eigen",
+    ],
+)

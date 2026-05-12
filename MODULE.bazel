@@ -1,0 +1,39 @@
+module(
+    name = "vslam",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "apple_support", version = "2.5.4", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "opencv", version = "4.13.0.bcr.5")
+bazel_dep(name = "sophus", version = "1.22.10.bcr.1")
+bazel_dep(name = "eigen", version = "5.0.1.bcr.1")
+bazel_dep(name = "ceres-solver", version = "2.2.0")
+bazel_dep(name = "glew", version = "2.2.0")
+bazel_dep(name = "rules_foreign_cc", version = "0.15.1")
+
+git_repository = use_repo_rule(
+    "@bazel_tools//tools/build_defs/repo:git.bzl",
+    "git_repository",
+)
+
+git_repository(
+    name = "pangolin_src",
+    commit = "2e86fc08a2eb071ccc685c081d7e85db936ecb24",
+    remote = "https://github.com/stevenlovegrove/Pangolin.git",
+    patches = [
+        "//third_party/patches:pangolin-eigen-glew.patch",
+    ],
+    build_file = "//third_party:foreign_src.BUILD.bazel",
+)
+
+git_repository(
+    name = "g2o_src",
+    commit = "eec325a1da1273e87bc97887d49e70570f28570c",
+    remote = "https://github.com/RainerKuemmerle/g2o.git",
+    patch_cmds = [
+        "perl -0pi.bak -e 's/if \\(EIGEN3_INCLUDE_DIR\\)/if (EIGEN3_INCLUDE_DIR)\\n  if(NOT IS_ABSOLUTE \"\\${EIGEN3_INCLUDE_DIR}\")\\n    get_filename_component(EIGEN3_INCLUDE_DIR \"\\$ENV{EXT_BUILD_ROOT}\\/\\${EIGEN3_INCLUDE_DIR}\" ABSOLUTE)\\n  endif()/m' cmake_modules/FindEigen3.cmake",
+        "perl -0pi.bak -e 's/option\\(G2O_USE_CHOLMOD \"Build g2o with CHOLMOD support\" ON\\) find_package\\(SuiteSparse\\)/option(G2O_USE_CHOLMOD \"Build g2o with CHOLMOD support\" ON)\\nif(G2O_USE_CHOLMOD)\\n  find_package(SuiteSparse)\\nendif()/m' CMakeLists.txt",
+        "perl -0pi.bak -e 's/option\\(G2O_USE_CSPARSE \"Build g2o with CSParse support\" ON\\) find_package\\(CSparse\\)/option(G2O_USE_CSPARSE \"Build g2o with CSParse support\" ON)\\nif(G2O_USE_CSPARSE)\\n  find_package(CSparse)\\nendif()/m' CMakeLists.txt",
+    ],
+    build_file = "//third_party:foreign_src.BUILD.bazel",
+)

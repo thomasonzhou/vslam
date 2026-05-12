@@ -1,0 +1,122 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
+package(default_visibility = ["//visibility:public"])
+
+PANGOLIN_DEFINES = [
+    "GLEW_STATIC",
+    "HAVE_EIGEN",
+    "HAVE_GLEW",
+] + select({
+    "@platforms//os:macos": ["_OSX_"],
+    "@platforms//os:linux": ["_LINUX_"],
+    "//conditions:default": [],
+})
+
+PANGOLIN_LINKOPTS = select({
+    "@platforms//os:macos": [
+        "-framework Cocoa",
+        "-framework OpenGL",
+    ],
+    "@platforms//os:linux": [
+        "-lGL",
+        "-lX11",
+        "-ldl",
+        "-pthread",
+    ],
+    "//conditions:default": [],
+})
+
+cmake(
+    name = "pangolin",
+    cache_entries = {
+        "BUILD_PANGOLIN_PYTHON": "OFF",
+        "BUILD_EXAMPLES": "OFF",
+        "BUILD_PANGOLIN_DEPTHSENSE": "OFF",
+        "BUILD_PANGOLIN_FFMPEG": "OFF",
+        "BUILD_PANGOLIN_LIBDC1394": "OFF",
+        "BUILD_PANGOLIN_LIBJPEG": "OFF",
+        "BUILD_PANGOLIN_LIBOPENEXR": "OFF",
+        "BUILD_PANGOLIN_LIBPNG": "OFF",
+        "BUILD_PANGOLIN_LIBRAW": "OFF",
+        "BUILD_PANGOLIN_LIBTIFF": "OFF",
+        "BUILD_PANGOLIN_LIBUVC": "OFF",
+        "BUILD_PANGOLIN_LZ4": "OFF",
+        "BUILD_PANGOLIN_OPENNI": "OFF",
+        "BUILD_PANGOLIN_OPENNI2": "OFF",
+        "BUILD_PANGOLIN_PLEORA": "OFF",
+        "BUILD_PANGOLIN_REALSENSE": "OFF",
+        "BUILD_PANGOLIN_REALSENSE2": "OFF",
+        "BUILD_PANGOLIN_TELICAM": "OFF",
+        "BUILD_PANGOLIN_UVC_MEDIAFOUNDATION": "OFF",
+        "BUILD_PANGOLIN_ZSTD": "OFF",
+        "BUILD_SHARED_LIBS": "OFF",
+        "BUILD_TESTS": "OFF",
+        "BUILD_TOOLS": "OFF",
+        "CMAKE_BUILD_TYPE": "Release",
+        "EIGEN3_INCLUDE_DIR": "external/eigen~",
+    },
+    defines = PANGOLIN_DEFINES,
+    lib_source = "@pangolin_src//:all_srcs",
+    linkopts = PANGOLIN_LINKOPTS,
+    out_static_libs = [
+        "libpango_tools.a",
+        "libpango_scene.a",
+        "libpango_plot.a",
+        "libpango_glgeometry.a",
+        "libpango_display.a",
+        "libpango_video.a",
+        "libpango_image.a",
+        "libpango_geometry.a",
+        "libpango_packetstream.a",
+        "libpango_windowing.a",
+        "libpango_opengl.a",
+        "libpango_vars.a",
+        "libpango_core.a",
+        "libpango_python.a",
+        "libtinyobj.a",
+    ],
+    deps = [
+        "@eigen//:eigen",
+        "@glew//:glew_static",
+    ],
+)
+
+cmake(
+    name = "g2o",
+    cache_entries = {
+        "BUILD_SHARED_LIBS": "OFF",
+        "BUILD_UNITTESTS": "OFF",
+        "BUILD_WITH_MARCH_NATIVE": "OFF",
+        "CMAKE_BUILD_TYPE": "Release",
+        "CSPARSE_FOUND": "FALSE",
+        "G2O_BUILD_APPS": "OFF",
+        "G2O_BUILD_BENCHMARKS": "OFF",
+        "G2O_BUILD_EXAMPLES": "OFF",
+        "G2O_USE_CHOLMOD": "OFF",
+        "G2O_USE_CSPARSE": "OFF",
+        "G2O_USE_LOGGING": "OFF",
+        "G2O_USE_OPENGL": "OFF",
+        "SuiteSparse_CHOLMOD_FOUND": "FALSE",
+        "EIGEN3_INCLUDE_DIR": "external/eigen~",
+    },
+    lib_source = "@g2o_src//:all_srcs",
+    out_static_libs = [
+        "libg2o_types_slam3d_addons.a",
+        "libg2o_types_slam2d_addons.a",
+        "libg2o_types_sclam2d.a",
+        "libg2o_types_data.a",
+        "libg2o_types_sim3.a",
+        "libg2o_types_icp.a",
+        "libg2o_types_sba.a",
+        "libg2o_types_slam3d.a",
+        "libg2o_types_slam2d.a",
+        "libg2o_solver_structure_only.a",
+        "libg2o_solver_slam2d_linear.a",
+        "libg2o_solver_pcg.a",
+        "libg2o_solver_eigen.a",
+        "libg2o_solver_dense.a",
+        "libg2o_stuff.a",
+        "libg2o_core.a",
+    ],
+    deps = ["@eigen//:eigen"],
+)

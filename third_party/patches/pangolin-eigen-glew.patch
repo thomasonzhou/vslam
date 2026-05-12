@@ -1,0 +1,39 @@
+diff --git a/components/pango_geometry/CMakeLists.txt b/components/pango_geometry/CMakeLists.txt
+--- a/components/pango_geometry/CMakeLists.txt
++++ b/components/pango_geometry/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-find_package(Eigen3 REQUIRED NO_MODULE)
++find_package(Eigen3 REQUIRED)
+
+diff --git a/components/pango_opengl/CMakeLists.txt b/components/pango_opengl/CMakeLists.txt
+--- a/components/pango_opengl/CMakeLists.txt
++++ b/components/pango_opengl/CMakeLists.txt
+@@ -1,4 +1,5 @@
+-find_package(GLEW REQUIRED)
++set(GLEW_INCLUDE_DIR "")
++set(GLEW_LIBRARY "")
+
+diff --git a/cmake/FindEigen3.cmake b/cmake/FindEigen3.cmake
+new file mode 100644
+--- /dev/null
++++ b/cmake/FindEigen3.cmake
+@@ -0,0 +1,17 @@
++if(NOT EIGEN3_INCLUDE_DIR)
++  message(FATAL_ERROR "EIGEN3_INCLUDE_DIR must be set by Bazel")
++endif()
++
++if(NOT IS_ABSOLUTE "${EIGEN3_INCLUDE_DIR}")
++  get_filename_component(
++    EIGEN3_INCLUDE_DIR
++    "$ENV{EXT_BUILD_ROOT}/${EIGEN3_INCLUDE_DIR}"
++    ABSOLUTE
++  )
++endif()
++
++set(EIGEN3_INCLUDE_DIRS "${EIGEN3_INCLUDE_DIR}")
++set(Eigen3_FOUND TRUE)
++
++if(NOT TARGET Eigen3::Eigen)
++  add_library(Eigen3::Eigen INTERFACE IMPORTED)
++  set_target_properties(Eigen3::Eigen PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${EIGEN3_INCLUDE_DIR}")
++endif()
