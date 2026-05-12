@@ -5,7 +5,6 @@ cc_library(
     name = "viz",
     srcs = ["viz/vizlib.cpp"],
     hdrs = ["viz/vizlib.h", "viz/vizlib_bal.h"],
-    copts = ["-I."],
     deps = [
         "//third_party:pangolin",
         "@eigen//:eigen",
@@ -24,7 +23,6 @@ cc_library(
         "util/eval.h",
         "util/utillib.h",
     ],
-    copts = ["-I."],
     deps = [
         "//:viz",
         "@eigen//:eigen",
@@ -45,7 +43,6 @@ cc_library(
         "frontend/orb.h",
         "frontend/point_sampling.h",
     ],
-    copts = ["-I."],
     deps = [
         "//:estimation",
         "//:geometry",
@@ -67,7 +64,6 @@ cc_library(
         "geometry/reprojection.h",
         "geometry/rotation.h",
     ],
-    copts = ["-I."],
     deps = [
         "@eigen//:eigen",
         "@opencv//:opencv",
@@ -93,7 +89,6 @@ cc_library(
         "estimation/pnp/pnp_g2o.h",
         "estimation/pnp/pnp_naive.h",
     ],
-    copts = ["-I."],
     deps = [
         "//:geometry",
         "//third_party:g2o",
@@ -106,7 +101,6 @@ cc_library(
 cc_binary(
     name = "vslam",
     srcs = ["slam_main.cpp"],
-    copts = ["-I."],
     deps = [
         "//:viz",
         "//third_party:g2o",
