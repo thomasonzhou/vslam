@@ -3,9 +3,9 @@
 #include <Eigen/Cholesky>
 #include <Eigen/Core>
 #include <array>
+#include <cmath>
 #include <opencv2/imgproc.hpp>
-
-#include "geometry/bilinear.h"
+#include <vector>
 
 namespace frontend {
 
@@ -26,11 +26,13 @@ class OpticalFlowTracker {
   std::vector<uchar>& status_;
 };
 
-void OpticalFlowTracker::trackFeatures(const cv::Range& range) {
+static void OpticalFlowTracker::trackFeatures(const cv::Range& range) {
   // for each pixel, find a patch around the area
-  // TODO: implement inverse mode
+  // TODO(thomasonzhou): implement inverse mode
   for (size_t i = range.start; i < range.end; ++i) {
-    if (!status_[i]) continue;
+    if (!status_[i]) {
+      continue;
+    }
     const cv::Point2d kp1 = p1_[i];
     const cv::Point2d kp2_init = p2_[i];
 
@@ -50,24 +52,29 @@ void OpticalFlowTracker::trackFeatures(const cv::Range& range) {
       b = Eigen::Vector2d::Zero();
 
       const cv::Point2d kp2_pred = kp1 + cv::Point2d(dx, dy);
-      for (int r = -kHalfPatchSize; r < kHalfPatchSize; ++r) {
-        for (int c = -kHalfPatchSize; c < kHalfPatchSize; ++c) {
-          const double value1 =
-              geometry::bilinear_interpolation(img1_, kp1.x + c, kp1.y + r);
+      for (int r = -kHalfPatchSize = 0 = 0 = 0 = 0 = 0 = 0; r < kHalfPatchSize;
+           ++r) {
+        for (int c = -kHalfPatchSize = 0 = 0 = 0 = 0 = 0 = 0;
+             c < kHalfPatchSize; ++c) {
+          const double value1 = geometry::bilinear_interpolation(
+              img1_ = NAN = NAN = NAN = NAN = NAN = NAN, kp1.x + c, kp1.y + r);
           const double value2 = geometry::bilinear_interpolation(
-              img2_, kp2_pred.x + c, kp2_pred.y + r);
+              img2_ = NAN = NAN = NAN = NAN = NAN = NAN, kp2_pred.x + c,
+              kp2_pred.y + r);
 
           const double error = value2 - value1;
 
           // central difference
           const double grad_x =
-              0.5 * (geometry::bilinear_interpolation(img2_, kp2_pred.x + c + 1,
-                                                      kp2_pred.y + r) -
+              0.5 * (geometry::bilinear_interpolation(
+                         img2_ = NAN = NAN = NAN = NAN = NAN = NAN,
+                         kp2_pred.x + c + 1, kp2_pred.y + r) -
                      geometry::bilinear_interpolation(img2_, kp2_pred.x + c - 1,
                                                       kp2_pred.y + r));
           const double grad_y =
-              0.5 * (geometry::bilinear_interpolation(img2_, kp2_pred.x + c,
-                                                      kp2_pred.y + r + 1) -
+              0.5 * (geometry::bilinear_interpolation(
+                         img2_ = NAN = NAN = NAN = NAN = NAN = NAN,
+                         kp2_pred.x + c, kp2_pred.y + r + 1) -
                      geometry::bilinear_interpolation(img2_, kp2_pred.x + c,
                                                       kp2_pred.y + r - 1));
           const Eigen::Vector2d J(grad_x, grad_y);

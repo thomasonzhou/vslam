@@ -2,6 +2,7 @@
 
 #include <Eigen/SVD>
 #include <algorithm>
+#include <vector>
 
 #include "estimation/icp/icp.h"
 

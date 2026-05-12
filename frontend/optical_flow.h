@@ -2,6 +2,8 @@
 #include <opencv2/core.hpp>
 #include <vector>
 
+#include "geometry/bilinear.h"
+
 namespace frontend {
 
 constexpr int kHalfPatchSize = 4;

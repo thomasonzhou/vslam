@@ -2,8 +2,8 @@
 
 #include <Eigen/Geometry>
 #include <sophus/se3.hpp>
+#include <string>
 #include <vector>
-
 namespace util {
 
 using Eigen::aligned_allocator;

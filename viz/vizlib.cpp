@@ -76,7 +76,7 @@ void pangolin_run(const std::function<void()>& draw_fn) {
           .SetBounds(0.0, 1.0, 0.0, 1.0, -kViewWidth / kViewHeight)
           .SetHandler(new pangolin::Handler3D(s_cam));
 
-  constexpr float white = 1.0f;
+  constexpr float white = 1.0F;
   while (!pangolin::ShouldQuit()) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     d_cam.Activate(s_cam);  // use s_cam for display
@@ -98,22 +98,18 @@ void pangolin_draw(const std::vector<trajectory_view>& traj_views) {
   });
 }
 
-
 void pangolin_draw(const std::vector<Eigen::Vector3d>& points) {
   pangolin_run([&]() {
-    draw_points(points.size(), [&](size_t i){
-      return points[i];
-    });
+    draw_points(points.size(), [&](size_t i) { return points[i]; });
   });
 }
 
-void pangolin_draw(const std::vector<Eigen::Vector3d>& points, const std::vector<Eigen::Vector3d>& points2) {
+void pangolin_draw(const std::vector<Eigen::Vector3d>& points,
+                   const std::vector<Eigen::Vector3d>& points2) {
   pangolin_run([&]() {
-    draw_points_compare(points.size(), [&](size_t i){
-      return points[i];
-    }, points2.size(), [&](size_t i){
-      return points2[i];
-    });
+    draw_points_compare(
+        points.size(), [&](size_t i) { return points[i]; }, points2.size(),
+        [&](size_t i) { return points2[i]; });
   });
 }
 

@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "viz",
     srcs = ["viz/vizlib.cpp"],
-    hdrs = ["viz/vizlib.h"],
+    hdrs = ["viz/vizlib.h", "viz/vizlib_bal.h"],
     copts = ["-I."],
     deps = [
         "//third_party:pangolin",
