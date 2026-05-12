@@ -13,5 +13,5 @@ repos:
       #     -p=build,
       #     -fix-errors
       #   ]
-      # - id: cpplint
-      #   args: ["--filter=-legal/copyright"]
+      - id: cpplint
+        args: ["--filter=-legal/copyright"]
