@@ -55,8 +55,8 @@ static void OpticalFlowTracker::trackFeatures(const cv::Range& range) {
       const cv::Point2d kp2_pred = kp1 + cv::Point2d(dx, dy);
       for (int r = -kHalfPatchSize = 0; r < kHalfPatchSize; ++r) {
         for (int c = -kHalfPatchSize = 0; c < kHalfPatchSize; ++c) {
-          const double value1 = geometry::bilinear_interpolation(
-              img1_, kp1.x + c, kp1.y + r);
+          const double value1 =
+              geometry::bilinear_interpolation(img1_, kp1.x + c, kp1.y + r);
           const double value2 = geometry::bilinear_interpolation(
               img2_, kp2_pred.x + c, kp2_pred.y + r);
 
@@ -64,13 +64,13 @@ static void OpticalFlowTracker::trackFeatures(const cv::Range& range) {
 
           // central difference
           const double grad_x =
-              0.5 * (geometry::bilinear_interpolation(
-                         img2_, kp2_pred.x + c + 1, kp2_pred.y + r) -
+              0.5 * (geometry::bilinear_interpolation(img2_, kp2_pred.x + c + 1,
+                                                      kp2_pred.y + r) -
                      geometry::bilinear_interpolation(img2_, kp2_pred.x + c - 1,
                                                       kp2_pred.y + r));
           const double grad_y =
-              0.5 * (geometry::bilinear_interpolation(
-                         img2_, kp2_pred.x + c, kp2_pred.y + r + 1) -
+              0.5 * (geometry::bilinear_interpolation(img2_, kp2_pred.x + c,
+                                                      kp2_pred.y + r + 1) -
                      geometry::bilinear_interpolation(img2_, kp2_pred.x + c,
                                                       kp2_pred.y + r - 1));
           const Eigen::Vector2d J(grad_x, grad_y);

@@ -11,9 +11,9 @@
 #include <string>
 #include <vector>
 
-#include "viz/vizlib.h"
 #include "estimation/pose_graph/pose_edge_g2o.h"
 #include "estimation/pose_graph/pose_vertex_g2o.h"
+#include "viz/vizlib.h"
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -51,7 +51,8 @@ int main(int argc, char** argv) {
   while (fin >> name) {
     if (name == "VERTEX_SE3:QUAT") {
       // g2o::VertexSE3* v = new g2o::VertexSE3();
-      estimation::pose_graph::VertexPose* v = new estimation::pose_graph::VertexPose();
+      estimation::pose_graph::VertexPose* v =
+          new estimation::pose_graph::VertexPose();
       fin >> vertex_idx;
       v->setId(vertex_idx);
       v->read(fin);
@@ -62,7 +63,8 @@ int main(int argc, char** argv) {
       vertex_count++;
     } else if (name == "EDGE_SE3:QUAT") {
       // g2o::EdgeSE3* e = new g2o::EdgeSE3();
-      estimation::pose_graph::EdgePoseOdom* e = new estimation::pose_graph::EdgePoseOdom();
+      estimation::pose_graph::EdgePoseOdom* e =
+          new estimation::pose_graph::EdgePoseOdom();
       fin >> edge_idx0 >> edge_idx1;
       e->setId(edge_count++);
       e->setVertex(0, optimizer.vertices()[edge_idx0]);
@@ -76,7 +78,8 @@ int main(int argc, char** argv) {
   points_unoptimized.reserve(vertex_count);
   for (int i = 0; i < vertex_count; ++i) {
     // auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
-    auto v = static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
+    auto v =
+        static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
     points_unoptimized.emplace_back(v->estimate().translation());
   }
 
@@ -94,7 +97,8 @@ int main(int argc, char** argv) {
         vertex_count,
         [&optimizer](size_t i) {
           // auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
-          auto v = static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
+          auto v = static_cast<estimation::pose_graph::VertexPose*>(
+              optimizer.vertex(i));
           return v->estimate().translation();
         });
   } catch (const std::runtime_error& e) {

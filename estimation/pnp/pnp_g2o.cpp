@@ -67,6 +67,7 @@ class EdgeProjection
 
   bool read(std::istream& /*in*/) override { return true; }
   bool write(std::ostream& /*out*/) const override { return true; }
+
  private:
   Eigen::Vector3d pos3d_;
   const geometry::PinholeCameraIntrinsics& intrinsics_;

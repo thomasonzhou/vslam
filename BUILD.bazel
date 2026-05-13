@@ -111,8 +111,8 @@ cc_binary(
     name = "vslam",
     srcs = ["slam_main.cpp"],
     deps = [
-        "//:viz",
         "//:estimation",
+        "//:viz",
         "//third_party:g2o",
         "@eigen",
     ],
