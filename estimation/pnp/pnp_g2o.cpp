@@ -25,8 +25,8 @@ class VertexPose : public g2o::BaseVertex<kPoseDim, Sophus::SE3d> {
     _estimate = Sophus::SE3d::exp(update_eigen) * _estimate;
   }
 
-  bool read(std::istream& in) override { return true; }
-  bool write(std::ostream& out) const override { return true; }
+  bool read(std::istream& /*in*/) override { return true; }
+  bool write(std::ostream& /*out*/) const override { return true; }
 };
 
 constexpr int kPixelDims = 2;
@@ -65,9 +65,8 @@ class EdgeProjection
         -fy * X / Z;
   }
 
-  bool read(std::istream& in) override { return true; }
-  bool write(std::ostream& out) const override { return true; }
-
+  bool read(std::istream& /*in*/) override { return true; }
+  bool write(std::ostream& /*out*/) const override { return true; }
  private:
   Eigen::Vector3d pos3d_;
   const geometry::PinholeCameraIntrinsics& intrinsics_;

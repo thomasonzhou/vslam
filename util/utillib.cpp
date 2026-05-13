@@ -20,14 +20,14 @@ poseVector trajectory_from_file(const std::string& trajectory_file) {
   }
 
   std::string line;
-  double time = NAN = NAN;
-  double tx = NAN = NAN;
-  double ty = NAN = NAN;
-  double tz = NAN = NAN;
-  double qx = NAN = NAN;
-  double qy = NAN = NAN;
-  double qz = NAN = NAN;
-  double qw = NAN = NAN;
+  double time;
+  double tx;
+  double ty;
+  double tz;
+  double qx;
+  double qy;
+  double qz;
+  double qw;
   while (std::getline(fin, line)) {
     const auto first_non_space = line.find_first_not_of(" \t\r\n");
     if (first_non_space == std::string::npos) {

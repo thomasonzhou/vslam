@@ -18,7 +18,7 @@ cc_library(
 )
 
 cc_library(
-    name = "utils",
+    name = "util",
     srcs = [
         "util/eval.cpp",
         "util/utillib.cpp",
@@ -26,6 +26,7 @@ cc_library(
     hdrs = [
         "util/bal.h",
         "util/eval.h",
+        "util/g2o_io.h",
         "util/utillib.h",
     ],
     deps = [
@@ -93,9 +94,12 @@ cc_library(
         "estimation/pnp/pnp.h",
         "estimation/pnp/pnp_g2o.h",
         "estimation/pnp/pnp_naive.h",
+        "estimation/pose_graph/pose_edge_g2o.h",
+        "estimation/pose_graph/pose_vertex_g2o.h",
     ],
     deps = [
         "//:geometry",
+        "//:util",
         "//third_party:g2o",
         "@eigen",
         "@opencv",
@@ -108,6 +112,7 @@ cc_binary(
     srcs = ["slam_main.cpp"],
     deps = [
         "//:viz",
+        "//:estimation",
         "//third_party:g2o",
         "@eigen",
     ],
