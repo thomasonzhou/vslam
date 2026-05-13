@@ -18,6 +18,29 @@ diff --git a/components/pango_opengl/CMakeLists.txt b/components/pango_opengl/CM
 +        find_path(GLEW_INCLUDE_DIR GL/glew.h)
 +        set(GLEW_LIBRARY "")
          target_include_directories(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${GLEW_INCLUDE_DIR}>)
+diff --git a/components/pango_windowing/CMakeLists.txt b/components/pango_windowing/CMakeLists.txt
+--- a/components/pango_windowing/CMakeLists.txt
++++ b/components/pango_windowing/CMakeLists.txt
+@@ -31,6 +31,19 @@
+     endif()
+ 
+     # Wayland
++    if(NOT PKG_CONFIG_EXECUTABLE)
++        foreach(_pkg_config_candidate
++            /usr/bin/pkg-config
++            /usr/local/bin/pkg-config
++            /opt/homebrew/bin/pkg-config
++            /opt/local/bin/pkg-config
++        )
++            if(EXISTS "${_pkg_config_candidate}")
++                set(PKG_CONFIG_EXECUTABLE "${_pkg_config_candidate}" CACHE FILEPATH "pkg-config executable" FORCE)
++                break()
++            endif()
++        endforeach()
++    endif()
+     find_package(PkgConfig)
+     pkg_check_modules(WAYLAND_CLIENT wayland-client QUIET)
+     pkg_check_modules(wayland-protocols QUIET wayland-protocols>=1.13)
 diff --git a/cmake/FindEigen3.cmake b/cmake/FindEigen3.cmake
 new file mode 100644
 --- /dev/null

@@ -1,3 +1,4 @@
 exports_files([
     "pangolin-eigen-glew.patch",
+    "rules_foreign_cc-pkgconfig-gnu17.patch",
 ])

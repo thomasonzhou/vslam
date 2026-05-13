@@ -1,14 +1,19 @@
-package(default_visibility = ["//visibility:public"])
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
+package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "viz",
     srcs = ["viz/vizlib.cpp"],
-    hdrs = ["viz/vizlib.h", "viz/vizlib_bal.h"],
+    hdrs = [
+        "viz/vizlib.h",
+        "viz/vizlib_bal.h",
+    ],
     deps = [
         "//third_party:pangolin",
-        "@eigen//:eigen",
-        "@sophus//:sophus",
+        "@eigen",
+        "@sophus",
     ],
 )
 
@@ -25,8 +30,8 @@ cc_library(
     ],
     deps = [
         "//:viz",
-        "@eigen//:eigen",
-        "@sophus//:sophus",
+        "@eigen",
+        "@sophus",
     ],
 )
 
@@ -46,9 +51,9 @@ cc_library(
     deps = [
         "//:estimation",
         "//:geometry",
-        "@eigen//:eigen",
-        "@opencv//:opencv",
-        "@sophus//:sophus",
+        "@eigen",
+        "@opencv",
+        "@sophus",
     ],
 )
 
@@ -65,9 +70,9 @@ cc_library(
         "geometry/rotation.h",
     ],
     deps = [
-        "@eigen//:eigen",
-        "@opencv//:opencv",
-        "@sophus//:sophus",
+        "@eigen",
+        "@opencv",
+        "@sophus",
     ],
 )
 
@@ -92,9 +97,9 @@ cc_library(
     deps = [
         "//:geometry",
         "//third_party:g2o",
-        "@eigen//:eigen",
-        "@opencv//:opencv",
-        "@sophus//:sophus",
+        "@eigen",
+        "@opencv",
+        "@sophus",
     ],
 )
 
@@ -104,6 +109,6 @@ cc_binary(
     deps = [
         "//:viz",
         "//third_party:g2o",
-        "@eigen//:eigen",
+        "@eigen",
     ],
 )

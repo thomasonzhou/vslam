@@ -1,4 +1,5 @@
 #include "viz/vizlib.h"
+#include <cstdlib>
 #include <vector>
 namespace viz {
 
@@ -57,7 +58,16 @@ void draw_point(const Eigen::Vector3d& point) {
 }
 
 void pangolin_run(const std::function<void()>& draw_fn) {
-  pangolin::CreateWindowAndBind("Pangolin Visualizer", kViewWidth, kViewHeight);
+  pangolin::Params window_params;
+  const char* session_type = std::getenv("XDG_SESSION_TYPE");
+  const char* window_uri = std::getenv("PANGOLIN_WINDOW_URI");
+  if (!window_uri && session_type &&
+      std::string(session_type) == "wayland") {
+    window_params.Set("scheme", "wayland");
+  }
+
+  pangolin::CreateWindowAndBind(
+      "Pangolin Visualizer", kViewWidth, kViewHeight, window_params);
   glEnable(GL_DEPTH_TEST);  // enable 3D depth buffer for occlusion
   glEnable(GL_BLEND);       // enable translucent objects
   glBlendFunc(
