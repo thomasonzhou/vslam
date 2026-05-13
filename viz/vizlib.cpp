@@ -1,16 +1,20 @@
 #include "viz/vizlib.h"
 #include <cstdlib>
+#include <string>
 #include <vector>
 namespace viz {
 
-void draw_trajectory(const poseVector& poses, const traj_viz_config& pg_config);
-void draw_axes(const Sophus::SE3d& pose);
-void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
-                  const traj_viz_config& pg_config);
-void draw_line(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
+using Pose = Sophus::SE3d;
+using Point = Eigen::Vector3d;
+using TrajConfig = traj_viz_config;
 
-void draw_trajectory(const poseVector& poses,
-                     const traj_viz_config& pg_config) {
+void draw_trajectory(const poseVector& poses, const TrajConfig& pg_config);
+void draw_axes(const Pose& pose);
+void connect_axes(const Pose& pose1, const Pose& pose2,
+                  const TrajConfig& pg_config);
+void draw_line(const Point& v1, const Point& v2);
+
+void draw_trajectory(const poseVector& poses, const TrajConfig& pg_config) {
   for (size_t i = 0; i < poses.size(); ++i) {
     if (pg_config.draw_pose_axes) {
       draw_axes(poses[i]);
@@ -21,12 +25,12 @@ void draw_trajectory(const poseVector& poses,
   }
 }
 
-void draw_axes(const Sophus::SE3d& pose) {
+void draw_axes(const Pose& pose) {
   constexpr double axisLength = 0.1;
-  const Eigen::Vector3d Ow = pose.translation();
-  const Eigen::Vector3d Ox = pose * (axisLength * Eigen::Vector3d(1.0, 0, 0));
-  const Eigen::Vector3d Oy = pose * (axisLength * Eigen::Vector3d(0, 1.0, 0));
-  const Eigen::Vector3d Oz = pose * (axisLength * Eigen::Vector3d(0, 0, 1.0));
+  const Point Ow = pose.translation();
+  const Point Ox = pose * (axisLength * Point(1.0, 0, 0));
+  const Point Oy = pose * (axisLength * Point(0, 1.0, 0));
+  const Point Oz = pose * (axisLength * Point(0, 0, 1.0));
   glBegin(GL_LINES);
   glColor3f(1.0, 0.0, 0.0);
   draw_line(Ow, Ox);
@@ -37,10 +41,10 @@ void draw_axes(const Sophus::SE3d& pose) {
   glEnd();
 }
 
-void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
-                  const traj_viz_config& pg_config) {
-  const Eigen::Vector3d t1 = pose1.translation();
-  const Eigen::Vector3d t2 = pose2.translation();
+void connect_axes(const Pose& pose1, const Pose& pose2,
+                  const TrajConfig& pg_config) {
+  const Point t1 = pose1.translation();
+  const Point t2 = pose2.translation();
   glBegin(GL_LINES);
   set_color(pg_config.trajectory_color);
 
@@ -48,12 +52,12 @@ void connect_axes(const Sophus::SE3d& pose1, const Sophus::SE3d& pose2,
   glEnd();
 }
 
-void draw_line(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2) {
+void draw_line(const Point& v1, const Point& v2) {
   glVertex3d(v1[0], v1[1], v1[2]);
   glVertex3d(v2[0], v2[1], v2[2]);
 }
 
-void draw_point(const Eigen::Vector3d& point) {
+void draw_point(const Point& point) {
   glVertex3d(point[0], point[1], point[2]);
 }
 
@@ -61,13 +65,12 @@ void pangolin_run(const std::function<void()>& draw_fn) {
   pangolin::Params window_params;
   const char* session_type = std::getenv("XDG_SESSION_TYPE");
   const char* window_uri = std::getenv("PANGOLIN_WINDOW_URI");
-  if (!window_uri && session_type &&
-      std::string(session_type) == "wayland") {
+  if (!window_uri && session_type && std::string(session_type) == "wayland") {
     window_params.Set("scheme", "wayland");
   }
 
-  pangolin::CreateWindowAndBind(
-      "Pangolin Visualizer", kViewWidth, kViewHeight, window_params);
+  pangolin::CreateWindowAndBind("Pangolin Visualizer", kViewWidth, kViewHeight,
+                                window_params);
   glEnable(GL_DEPTH_TEST);  // enable 3D depth buffer for occlusion
   glEnable(GL_BLEND);       // enable translucent objects
   glBlendFunc(
@@ -108,14 +111,14 @@ void pangolin_draw(const std::vector<trajectory_view>& traj_views) {
   });
 }
 
-void pangolin_draw(const std::vector<Eigen::Vector3d>& points) {
+void pangolin_draw(const std::vector<Point>& points) {
   pangolin_run([&]() {
     draw_points(points.size(), [&](size_t i) { return points[i]; });
   });
 }
 
-void pangolin_draw(const std::vector<Eigen::Vector3d>& points,
-                   const std::vector<Eigen::Vector3d>& points2) {
+void pangolin_draw(const std::vector<Point>& points,
+                   const std::vector<Point>& points2) {
   pangolin_run([&]() {
     draw_points_compare(
         points.size(), [&](size_t i) { return points[i]; }, points2.size(),

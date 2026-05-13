@@ -83,7 +83,7 @@ cmake(
     ],
     deps = [
         "@eigen",
-        "@glew//:glew",
+        "@glew",
     ],
 )
 
