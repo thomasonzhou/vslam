@@ -32,8 +32,8 @@ class EdgePoseOdom
   }
 
   void linearizeOplus() override {
-    const Sophus::SE3d v1 =
-        (static_cast<const VertexPose*>(_vertices[0]))->estimate();
+    // const Sophus::SE3d v1 =
+    //     (static_cast<const VertexPose*>(_vertices[0]))->estimate();
     const Sophus::SE3d v2 =
         (static_cast<const VertexPose*>(_vertices[1]))->estimate();
 

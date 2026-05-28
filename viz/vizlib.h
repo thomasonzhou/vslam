@@ -87,8 +87,8 @@ struct point_compare_config {
   bool draw_correspondence_lines = true;
 };
 
-template <typename PointGetter>
-void draw_points(const size_t count, PointGetter get_point,
+template <typename PointReader>
+void draw_points(const size_t count, PointReader get_point,
                  const point_config& p_config = point_config{}) {
   set_color(p_config.point_color, p_config.point_alpha);
   glPointSize(p_config.point_size);

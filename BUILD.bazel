@@ -9,6 +9,7 @@ cc_library(
     hdrs = [
         "viz/vizlib.h",
         "viz/vizlib_bal.h",
+        "viz/g2o_viz.h"#include "estimation/bundle_adjustment/g2o_ba.h"
     ],
     deps = [
         "//third_party:pangolin",

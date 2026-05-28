@@ -14,6 +14,7 @@
 #include "estimation/pose_graph/pose_edge_g2o.h"
 #include "estimation/pose_graph/pose_vertex_g2o.h"
 #include "viz/vizlib.h"
+#include "viz/g2o_viz.h"
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -76,34 +77,53 @@ int main(int argc, char** argv) {
 
   std::vector<Eigen::Vector3d> points_unoptimized;
   points_unoptimized.reserve(vertex_count);
+  std::vector<estimation::pose_graph::VertexPose*> pose_vertices;
+  pose_vertices.reserve(vertex_count);
   for (int i = 0; i < vertex_count; ++i) {
     // auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
     auto v =
-        static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
+    static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
     points_unoptimized.emplace_back(v->estimate().translation());
+    pose_vertices.emplace_back(static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i)));
   }
+  std::vector<Eigen::Vector3d> points_optimized = points_unoptimized;
+
+  std::mutex points_m;
+  viz::PointUpdateAction update_action(
+    pose_vertices,
+    points_optimized, 
+    points_m,
+    [](estimation::pose_graph::VertexPose* point){
+      return point->estimate().translation();
+    }
+  );
+  optimizer.addPostIterationAction(&update_action);
 
   std::cout << "read " << vertex_count << " vertices, " << edge_count
             << " edges" << std::endl;
-  optimizer.initializeOptimization();
-
-  constexpr int kOptimizeSteps = 30;
-  optimizer.optimize(kOptimizeSteps);
+  std::thread optimizer_thread([&](){
+    optimizer.initializeOptimization();
+    
+    constexpr int kOptimizeSteps = 30;
+    optimizer.optimize(kOptimizeSteps);
+  });
 
   try {
     viz::pangolin_draw(
         vertex_count,
         [&points_unoptimized](size_t i) { return points_unoptimized[i]; },
         vertex_count,
-        [&optimizer](size_t i) {
+        [&optimizer, &points_m, &points_optimized](size_t i) {
+          std::lock_guard<std::mutex> optimizer_points_lk(points_m);
           // auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
-          auto v = static_cast<estimation::pose_graph::VertexPose*>(
-              optimizer.vertex(i));
-          return v->estimate().translation();
+          return points_optimized[i];
         });
   } catch (const std::runtime_error& e) {
     std::cerr << "Visualization disabled: " << e.what() << std::endl;
   }
 
+  if (optimizer_thread.joinable()){
+    optimizer_thread.join();
+  }
   return 0;
 }
