@@ -40,7 +40,7 @@ int main(int argc, char **argv){
     vocab.create(orb_descriptors);
     std::cout << vocab << std::endl;
 
-    const std::string kSaveDir = kImagePrefix + "vocabulary.yml.gz";
+    const std::string kSaveDir = kImagePrefix + "vocabulary.bin";
     vocab.save(kSaveDir);
     return 0;
 
