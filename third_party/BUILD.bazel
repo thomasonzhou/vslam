@@ -138,5 +138,5 @@ cmake(
     out_static_libs = [
         "libDBoW3.a",
     ],
-    deps = ["@opencv//:opencv"],
+    deps = ["@opencv"],
 )

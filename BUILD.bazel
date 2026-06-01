@@ -7,9 +7,9 @@ cc_library(
     name = "viz",
     srcs = ["viz/vizlib.cpp"],
     hdrs = [
+        "viz/g2o_viz.h",  #include "estimation/bundle_adjustment/g2o_ba.h"
         "viz/vizlib.h",
         "viz/vizlib_bal.h",
-        "viz/g2o_viz.h"#include "estimation/bundle_adjustment/g2o_ba.h"
     ],
     deps = [
         "//third_party:pangolin",
@@ -28,8 +28,8 @@ cc_library(
         "util/bal.h",
         "util/eval.h",
         "util/g2o_io.h",
+        "util/multi_descriptor.h",
         "util/utillib.h",
-        "util/multi_descriptor.h"
     ],
     deps = [
         "//:viz",
@@ -121,19 +121,19 @@ cc_binary(
 )
 
 cc_binary(
-    name="dbow_train",
-    srcs=["dbow_train.cpp"],
-    deps=[
+    name = "dbow_train",
+    srcs = ["dbow_train.cpp"],
+    deps = [
+        "//:util",
         "//third_party:dbow3",
-        "//:util"
-    ]
+    ],
 )
 
 cc_binary(
-    name="dbow_eval",
-    srcs=["dbow_eval.cpp"],
-    deps=[
+    name = "dbow_eval",
+    srcs = ["dbow_eval.cpp"],
+    deps = [
+        "//:util",
         "//third_party:dbow3",
-        "//:util"
-    ]
+    ],
 )

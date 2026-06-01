@@ -13,8 +13,8 @@
 
 #include "estimation/pose_graph/pose_edge_g2o.h"
 #include "estimation/pose_graph/pose_vertex_g2o.h"
-#include "viz/vizlib.h"
 #include "viz/g2o_viz.h"
+#include "viz/vizlib.h"
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -82,28 +82,26 @@ int main(int argc, char** argv) {
   for (int i = 0; i < vertex_count; ++i) {
     // auto v = static_cast<g2o::VertexSE3*>(optimizer.vertex(i));
     auto v =
-    static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
+        static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i));
     points_unoptimized.emplace_back(v->estimate().translation());
-    pose_vertices.emplace_back(static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i)));
+    pose_vertices.emplace_back(
+        static_cast<estimation::pose_graph::VertexPose*>(optimizer.vertex(i)));
   }
   std::vector<Eigen::Vector3d> points_optimized = points_unoptimized;
 
   std::mutex points_m;
   viz::PointUpdateAction update_action(
-    pose_vertices,
-    points_optimized, 
-    points_m,
-    [](estimation::pose_graph::VertexPose* point){
-      return point->estimate().translation();
-    }
-  );
+      pose_vertices, points_optimized, points_m,
+      [](estimation::pose_graph::VertexPose* point) {
+        return point->estimate().translation();
+      });
   optimizer.addPostIterationAction(&update_action);
 
   std::cout << "read " << vertex_count << " vertices, " << edge_count
             << " edges" << std::endl;
-  std::thread optimizer_thread([&](){
+  std::thread optimizer_thread([&]() {
     optimizer.initializeOptimization();
-    
+
     constexpr int kOptimizeSteps = 30;
     optimizer.optimize(kOptimizeSteps);
   });
@@ -122,7 +120,7 @@ int main(int argc, char** argv) {
     std::cerr << "Visualization disabled: " << e.what() << std::endl;
   }
 
-  if (optimizer_thread.joinable()){
+  if (optimizer_thread.joinable()) {
     optimizer_thread.join();
   }
   return 0;
