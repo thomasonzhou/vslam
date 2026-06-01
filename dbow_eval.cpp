@@ -30,16 +30,35 @@ int main(int argc, char **argv){
 
     std::cout << "performing image to image comparison" << std::endl;
 
-    for (int i = 0; i < orb_descriptors.size(); ++i){
+    for (size_t i = 0; i < orb_descriptors.size(); ++i){
         DBoW3::BowVector v1;
         vocab.transform(orb_descriptors[i], v1);
-        for (int j = i; j < orb_descriptors.size(); ++j){
+        for (size_t j = i; j < orb_descriptors.size(); ++j){
             DBoW3::BowVector v2;
             vocab.transform(orb_descriptors[j], v2);
 
             const double similarity_score = vocab.score(v1, v2);
             std::cout << "images " << i << ", " << j << ": " << similarity_score << std::endl;
         }
+    }
+
+    std::cout << "performing image to database comparison" << std::endl;
+
+    constexpr bool kUseDirectIndex = false;
+    constexpr int kDirectIndexLevels = 0;
+    DBoW3::Database db(vocab, kUseDirectIndex, kDirectIndexLevels);
+
+    for (const cv::Mat& descriptor: orb_descriptors){
+        db.add(descriptor);
+    }
+    std::cout << db << std::endl;
+
+    constexpr int kMaxQueryReturn = 4;
+    for (size_t i = 0; i < orb_descriptors.size(); ++i){
+        DBoW3::QueryResults res;
+        db.query(orb_descriptors[i], res, kMaxQueryReturn);
+
+        std::cout << "query image " << i << " returns " << res << std::endl;
     }
 
     return 0;
