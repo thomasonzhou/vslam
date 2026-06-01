@@ -47,3 +47,10 @@ git_repository(
     ],
     remote = "https://github.com/RainerKuemmerle/g2o.git",
 )
+
+git_repository(
+    name = "dbow3_src",
+    build_file = "//third_party:foreign_src.BUILD.bazel",
+    commit = "1cc587bbfc08c0adb0ea2d00d81ad6cd4103ce39",
+    remote = "https://github.com/rmsalinas/DBow3.git",
+)

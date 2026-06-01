@@ -126,3 +126,17 @@ cmake(
     ],
     deps = ["@eigen"],
 )
+
+cmake(
+    name = "dbow3",
+    cache_entries = {
+        "BUILD_SHARED_LIBS": "OFF",
+        "BUILD_UTILS": "OFF",
+        "CMAKE_BUILD_TYPE": "Release",
+    },
+    lib_source = "@dbow3_src//:all_srcs",
+    out_static_libs = [
+        "libDBoW3.a",
+    ],
+    deps = ["@opencv//:opencv"],
+)
