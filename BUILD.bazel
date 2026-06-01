@@ -29,6 +29,7 @@ cc_library(
         "util/eval.h",
         "util/g2o_io.h",
         "util/utillib.h",
+        "util/multi_descriptor.h"
     ],
     deps = [
         "//:viz",
@@ -120,9 +121,19 @@ cc_binary(
 )
 
 cc_binary(
-    name="dbow",
-    srcs=["dbow.cpp"],
+    name="dbow_train",
+    srcs=["dbow_train.cpp"],
     deps=[
-        "//third_party:dbow3"
+        "//third_party:dbow3",
+        "//:util"
+    ]
+)
+
+cc_binary(
+    name="dbow_eval",
+    srcs=["dbow_eval.cpp"],
+    deps=[
+        "//third_party:dbow3",
+        "//:util"
     ]
 )
